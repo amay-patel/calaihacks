@@ -11,10 +11,16 @@ import {
     Progress,
 } from "@chakra-ui/react";
 import { atom, useAtom } from "jotai";
+import { imageFiles } from "./ImageNames";
+
+const getRandomImage = () => {
+    const randomIndex = Math.floor(Math.random() * imageFiles.length);
+    return `/defaultImgs/${imageFiles[randomIndex]}`;
+};
 
 // Jotai atoms for state management
 const storyTextAtom = atom("");
-const storyImageAtom = atom("");
+const storyImageAtom = atom(getRandomImage());
 const audioProgressAtom = atom(0);
 
 const StoryCreator = () => {
@@ -33,9 +39,10 @@ const StoryCreator = () => {
 
     const generateImage = async () => {
         setIsGenerating(true);
-        // Simulating API call to OpenAI for image generation
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setStoryImage("/api/placeholder/400/300");
+        // For now, we'll just select another random image
+        // In a real scenario, this would be an API call to generate a new image
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setStoryImage(getRandomImage());
         setIsGenerating(false);
     };
 
@@ -60,8 +67,10 @@ const StoryCreator = () => {
                     <HStack>
                         <Box flex={1} borderWidth={1} borderRadius="md" p={4}>
                             <Image
-                                src={storyImage || "/api/placeholder/400/300"}
+                                src={storyImage}
                                 alt="Story illustration"
+                                objectFit="cover"
+                                boxSize="300px"
                             />
                         </Box>
                         <VStack flex={1} align="stretch" spacing={4}>
