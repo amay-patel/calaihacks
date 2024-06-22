@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     Box,
     VStack,
@@ -13,6 +13,7 @@ import {
 import { atom, useAtom } from "jotai";
 import { imageFiles } from "./ImageNames";
 import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
+import { addPageToStory, createStory } from "../firebase/firebase";
 
 const getRandomImage = () => {
     const randomIndex = Math.floor(Math.random() * imageFiles.length);
@@ -31,6 +32,50 @@ const StoryCreator = () => {
     const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
     const toast = useToast();
+
+    useEffect(() => {
+        // Check if there's an existing story ID in localStorage
+        const existingStoryId = localStorage.getItem("currentStoryId");
+        console.log(existingStoryId);
+        if (!existingStoryId) {
+            console.log("entered");
+            initializeNewStory();
+        } else {
+            toast({
+                title: "Existing Story Loaded",
+                description: `Story ID: ${existingStoryId}`,
+                status: "info",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    }, []);
+
+    const initializeNewStory = async () => {
+        console.log("entered2");
+        try {
+            const newStoryId = await createStory([]);
+            console.log("entered3");
+            localStorage.setItem("currentStoryId", newStoryId);
+            console.log("saved", localStorage.getItem("currentStoryId"));
+            toast({
+                title: "New Story Created",
+                description: `Story ID: ${newStoryId}`,
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+        } catch (error) {
+            console.error("Error creating new story:", error);
+            toast({
+                title: "Error",
+                description: "Failed to create a new story.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
     const generateStory = async () => {
         setIsGenerating(true);
@@ -101,6 +146,47 @@ const StoryCreator = () => {
         }, 500);
     };
 
+    const savePage = async () => {
+        const currentStoryId = localStorage.getItem("currentStoryId");
+        if (!currentStoryId) {
+            toast({
+                title: "Error",
+                description: "No active story. Please refresh the page.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+
+        try {
+            await addPageToStory(currentStoryId, {
+                text: storyText,
+                image_url: storyImage,
+                audio_url: "", // We're not handling audio yet, so leaving this empty
+            });
+            toast({
+                title: "Page Saved",
+                description: "The current page has been added to the story.",
+                status: "success",
+                duration: 5000,
+                isClosable: true,
+            });
+            // Clear the current page content
+            setStoryText("");
+            setStoryImage("/images/placeholder.jpg");
+        } catch (error) {
+            console.error("Error saving page:", error);
+            toast({
+                title: "Error",
+                description: "Failed to save the page. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     return (
         <Box p={5} maxWidth="800px" margin="auto">
             <VStack spacing={6} align="stretch">
@@ -135,6 +221,9 @@ const StoryCreator = () => {
                             isLoading={isGenerating}
                         >
                             Generate Image
+                        </Button>
+                        <Button onClick={savePage} colorScheme="green">
+                            Save Page
                         </Button>
                     </VStack>
                 </HStack>
