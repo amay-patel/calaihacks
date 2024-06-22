@@ -12,13 +12,12 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAqP4aEEew4x7BSmyxFGowLUvqy8rKA5SQ",
-  authDomain: "calaihacks.firebaseapp.com",
-  projectId: "calaihacks",
-  storageBucket: "calaihacks.appspot.com",
-  messagingSenderId: "319449088425",
-  appId: "1:319449088425:web:ce722586b71dc89b3d84b8",
-  measurementId: "G-Q9N1BMNPP9",
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
 // Initialize Firebase
@@ -114,3 +113,5 @@ export const addPageToStory = async (
     throw error;
   }
 };
+
+export { app, db as default };
