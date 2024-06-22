@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-    ChakraProvider,
     Box,
     VStack,
     HStack,
@@ -57,61 +56,57 @@ const StoryCreator = () => {
     };
 
     return (
-        <ChakraProvider>
-            <Box p={5} maxWidth="800px" margin="auto">
-                <VStack spacing={6} align="stretch">
-                    <Text fontSize="2xl" fontWeight="bold" textAlign="center">
-                        Interactive Storybook Creator
-                    </Text>
+        <Box p={5} maxWidth="800px" margin="auto">
+            <VStack spacing={6} align="stretch">
+                <Text fontSize="2xl" fontWeight="bold" textAlign="center">
+                    Interactive Storybook Creator
+                </Text>
 
-                    <HStack>
-                        <Box flex={1} borderWidth={1} borderRadius="md" p={4}>
-                            <Image
-                                src={storyImage}
-                                alt="Story illustration"
-                                objectFit="cover"
-                                boxSize="300px"
-                            />
-                        </Box>
-                        <VStack flex={1} align="stretch" spacing={4}>
-                            <Textarea
-                                value={storyText}
-                                onChange={(e) => setStoryText(e.target.value)}
-                                placeholder="Your story will appear here..."
-                                minHeight="200px"
-                            />
-                            <Button
-                                onClick={generateStory}
-                                isLoading={isGenerating}
-                            >
-                                Generate Story
-                            </Button>
-                            <Button
-                                onClick={generateImage}
-                                isLoading={isGenerating}
-                            >
-                                Generate Image
-                            </Button>
-                        </VStack>
-                    </HStack>
-
-                    <Box>
-                        <Text mb={2}>Audio Narration</Text>
-                        <Progress value={audioProgress} mb={2} />
-                        <Button
-                            onClick={playAudio}
-                            isDisabled={
-                                audioProgress > 0 && audioProgress < 100
-                            }
-                        >
-                            {audioProgress > 0 && audioProgress < 100
-                                ? "Playing..."
-                                : "Play Narration"}
-                        </Button>
+                <HStack>
+                    <Box flex={1} borderWidth={1} borderRadius="md" p={4}>
+                        <Image
+                            src={storyImage}
+                            alt="Story illustration"
+                            objectFit="cover"
+                            boxSize="300px"
+                        />
                     </Box>
-                </VStack>
-            </Box>
-        </ChakraProvider>
+                    <VStack flex={1} align="stretch" spacing={4}>
+                        <Textarea
+                            value={storyText}
+                            onChange={(e) => setStoryText(e.target.value)}
+                            placeholder="Your story will appear here..."
+                            minHeight="200px"
+                        />
+                        <Button
+                            onClick={generateStory}
+                            isLoading={isGenerating}
+                        >
+                            Generate Story
+                        </Button>
+                        <Button
+                            onClick={generateImage}
+                            isLoading={isGenerating}
+                        >
+                            Generate Image
+                        </Button>
+                    </VStack>
+                </HStack>
+
+                <Box>
+                    <Text mb={2}>Audio Narration</Text>
+                    <Progress value={audioProgress} mb={2} />
+                    <Button
+                        onClick={playAudio}
+                        isDisabled={audioProgress > 0 && audioProgress < 100}
+                    >
+                        {audioProgress > 0 && audioProgress < 100
+                            ? "Playing..."
+                            : "Play Narration"}
+                    </Button>
+                </Box>
+            </VStack>
+        </Box>
     );
 };
 
