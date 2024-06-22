@@ -7,38 +7,28 @@ import {
     Button,
     Textarea,
     Image,
-    Progress,
     useToast,
 } from "@chakra-ui/react";
-import { atom, useAtom } from "jotai";
-import { imageFiles } from "./ImageNames";
+import { useAtom } from "jotai";
 import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
 import { addPageToStory, createStory } from "../firebase/firebase";
-
-const getRandomImage = () => {
-    const randomIndex = Math.floor(Math.random() * imageFiles.length);
-    return `/defaultImgs/${imageFiles[randomIndex]}`;
-};
+import { storyImageAtom, storyTextAtom } from "../state/currentStory";
+import { storyAtom } from "../state/story";
 
 // Jotai atoms for state management
-const storyTextAtom = atom("");
-const storyImageAtom = atom(getRandomImage());
-const audioProgressAtom = atom(0);
 
 const StoryCreator = () => {
     const [storyText, setStoryText] = useAtom(storyTextAtom);
     const [storyImage, setStoryImage] = useAtom(storyImageAtom);
-    const [audioProgress, setAudioProgress] = useAtom(audioProgressAtom);
     const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [story, setStory] = useAtom(storyAtom);
     const toast = useToast();
 
     useEffect(() => {
         // Check if there's an existing story ID in localStorage
         const existingStoryId = localStorage.getItem("currentStoryId");
-        console.log(existingStoryId);
         if (!existingStoryId) {
-            console.log("entered");
             initializeNewStory();
         } else {
             toast({
@@ -52,12 +42,9 @@ const StoryCreator = () => {
     }, []);
 
     const initializeNewStory = async () => {
-        console.log("entered2");
         try {
             const newStoryId = await createStory([]);
-            console.log("entered3");
             localStorage.setItem("currentStoryId", newStoryId);
-            console.log("saved", localStorage.getItem("currentStoryId"));
             toast({
                 title: "New Story Created",
                 description: `Story ID: ${newStoryId}`,
@@ -136,16 +123,6 @@ const StoryCreator = () => {
         }
     };
 
-    const playAudio = () => {
-        // Simulating audio playback
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            setAudioProgress(progress);
-            if (progress >= 100) clearInterval(interval);
-        }, 500);
-    };
-
     const savePage = async () => {
         const currentStoryId = localStorage.getItem("currentStoryId");
         if (!currentStoryId) {
@@ -164,6 +141,17 @@ const StoryCreator = () => {
                 text: storyText,
                 image_url: storyImage,
                 audio_url: "", // We're not handling audio yet, so leaving this empty
+            });
+            setStory({
+                ...story,
+                pages: [
+                    ...story.pages,
+                    {
+                        text: storyText,
+                        image_url: storyImage,
+                        audio_url: "", // We're not handling audio yet, so leaving this empty
+                    },
+                ],
             });
             toast({
                 title: "Page Saved",
@@ -228,18 +216,9 @@ const StoryCreator = () => {
                     </VStack>
                 </HStack>
 
-                <Box>
-                    <Text mb={2}>Audio Narration</Text>
-                    <Progress value={audioProgress} mb={2} />
-                    <Button
-                        onClick={playAudio}
-                        isDisabled={audioProgress > 0 && audioProgress < 100}
-                    >
-                        {audioProgress > 0 && audioProgress < 100
-                            ? "Playing..."
-                            : "Play Narration"}
-                    </Button>
-                </Box>
+                {story.pages.map((e) => (
+                    <Box>{e.text}</Box>
+                ))}
             </VStack>
         </Box>
     );

@@ -10,6 +10,7 @@ import {
     DocumentReference,
     DocumentSnapshot,
 } from "firebase/firestore";
+import { Page, Story } from "../state/story";
 
 const firebaseConfig = {
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -25,17 +26,6 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firestore
 const db = getFirestore(app);
-
-// Define types
-export interface Page {
-    text: string;
-    image_url: string;
-    audio_url: string;
-}
-
-interface Story {
-    pages: Page[];
-}
 
 // Helper function to create a new story
 export const createStory = async (pages: Page[]): Promise<string> => {
