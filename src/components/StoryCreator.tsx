@@ -8,9 +8,11 @@ import {
     Textarea,
     Image,
     Progress,
+    useToast,
 } from "@chakra-ui/react";
 import { atom, useAtom } from "jotai";
 import { imageFiles } from "./ImageNames";
+import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
 
 const getRandomImage = () => {
     const randomIndex = Math.floor(Math.random() * imageFiles.length);
@@ -26,7 +28,9 @@ const StoryCreator = () => {
     const [storyText, setStoryText] = useAtom(storyTextAtom);
     const [storyImage, setStoryImage] = useAtom(storyImageAtom);
     const [audioProgress, setAudioProgress] = useAtom(audioProgressAtom);
+    const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
+    const toast = useToast();
 
     const generateStory = async () => {
         setIsGenerating(true);
@@ -37,12 +41,54 @@ const StoryCreator = () => {
     };
 
     const generateImage = async () => {
+        if (!apiKeys.OPENAI_API_KEY) {
+            toast({
+                title: "API Key Missing",
+                description: "Please set your OpenAI API key in the settings.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+
         setIsGenerating(true);
-        // For now, we'll just select another random image
-        // In a real scenario, this would be an API call to generate a new image
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setStoryImage(getRandomImage());
-        setIsGenerating(false);
+        try {
+            const response = await fetch(
+                "https://api.openai.com/v1/images/generations",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${apiKeys.OPENAI_API_KEY}`,
+                    },
+                    body: JSON.stringify({
+                        prompt: storyText || "A magical storybook scene",
+                        n: 1,
+                        size: "512x512",
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to generate image");
+            }
+
+            const data = await response.json();
+            setStoryImage(data.data[0].url);
+        } catch (error) {
+            console.error("Error generating image:", error);
+            toast({
+                title: "Image Generation Failed",
+                description:
+                    "There was an error generating the image. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     const playAudio = () => {
