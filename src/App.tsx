@@ -25,6 +25,32 @@ const theme = extendTheme({
         body: "Funkids, sans-serif",
         heading: "Funkids, sans-serif",
     },
+    styles: {
+        global: {
+            // Apply letter spacing to all text
+            body: {
+                letterSpacing: "0.05em",
+            },
+            // Additional spacing for headings
+            "h1, h2, h3, h4, h5, h6": {
+                letterSpacing: "0.08em",
+            },
+        },
+    },
+    components: {
+        // Adjust button text spacing
+        Button: {
+            baseStyle: {
+                letterSpacing: "0.06em",
+            },
+        },
+        // Adjust textarea text spacing
+        Textarea: {
+            baseStyle: {
+                letterSpacing: "0.04em",
+            },
+        },
+    },
 });
 
 function App() {
