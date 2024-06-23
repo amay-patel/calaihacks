@@ -4,6 +4,8 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import StoryCreator from "./components/StoryCreator";
 import { ApiKeyModal } from "./components/ApiKeyModal";
 import { Global } from "@emotion/react";
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import PhotoCarousel from './components/PhotoCarousel';
 import FloatingBubblesBackground from "./components/FloatingBubblesBackground";
 
 // Custom font face definition
@@ -60,7 +62,12 @@ function App() {
             <Fonts />
             <FloatingBubblesBackground />
             <ApiKeyModal />
-            <StoryCreator />
+            <Router>
+                <Routes>
+                    <Route path="/" element={<StoryCreator />} />
+                    <Route path="/view/:id" element={<PhotoCarousel />} /> 
+                </Routes>
+            </Router>
         </ChakraProvider>
     );
 }
