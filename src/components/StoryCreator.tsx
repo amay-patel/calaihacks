@@ -12,6 +12,17 @@ import {
     MenuItem,
     MenuButton,
     Menu,
+    Modal,
+    ModalContent,
+    ModalOverlay,
+    ModalHeader,
+    ModalCloseButton,
+    ModalBody,
+    Flex,
+    Input,
+    ModalFooter,
+    useClipboard,
+    useDisclosure,
 } from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
@@ -41,7 +52,11 @@ const StoryCreatorInner = () => {
     const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
     const [story, setStory] = useAtom(storyAtom);
+    const { hasCopied, onCopy } = useClipboard(
+        `localhost:3000/view/${localStorage.getItem("currentStoryId")}`
+    );
     const { connect, disconnect, status, lastVoiceMessage } = useVoice();
+    const { isOpen, onOpen, onClose } = useDisclosure();
     const [messages, setMessages] = useState<string[]>([]);
 
     useEffect(() => {
@@ -63,22 +78,33 @@ const StoryCreatorInner = () => {
         }
     }, [lastVoiceMessage?.message.content]);
 
-  const toast = useToast();
+    const toast = useToast();
 
-  const captureAndUploadImage = async (image_url: string) => {
-    const response = await fetch("http://localhost:3000/upload", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl: image_url }), // body data type must match "Content-Type" header
-    });
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    const handleCopy = () => {
+        onCopy();
+        toast({
+            position: "bottom-right",
+            title: "Link copied!",
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+        });
+    };
 
-    return await response.json(); // parses JSON response into native JavaScript objects
-  };
+    const captureAndUploadImage = async (image_url: string) => {
+        const response = await fetch("http://localhost:3000/upload", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ imageUrl: image_url }), // body data type must match "Content-Type" header
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        return await response.json(); // parses JSON response into native JavaScript objects
+    };
 
     useEffect(() => {
         const fetchStory = async (storyId: string) => {
@@ -144,6 +170,8 @@ const StoryCreatorInner = () => {
         setIsGenerating(true);
         if (status.value === "connected") {
             disconnect();
+            // pop modal
+            onOpen();
             return;
         }
         void connect()
@@ -167,50 +195,50 @@ const StoryCreatorInner = () => {
             return;
         }
 
-    setIsGenerating(true);
-    try {
-      const response = await fetch(
-        "https://api.openai.com/v1/images/generations",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKeys.OPENAI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            prompt: message,
-            n: 1,
-            size: "512x512",
-          }),
+        setIsGenerating(true);
+        try {
+            const response = await fetch(
+                "https://api.openai.com/v1/images/generations",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${apiKeys.OPENAI_API_KEY}`,
+                    },
+                    body: JSON.stringify({
+                        prompt: message,
+                        n: 1,
+                        size: "512x512",
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to generate image");
+            }
+
+            const data = await response.json();
+            const tmpImageUrl = data.data[0].url;
+            // convert the url here
+
+            setStoryImage(tmpImageUrl);
+            const { url } = await captureAndUploadImage(tmpImageUrl);
+            await savePage(message, url);
+        } catch (error) {
+            console.error("Error generating image:", error);
+            toast({
+                position: "bottom-right",
+                title: "Image Generation Failed",
+                description:
+                    "There was an error generating the image. Please try again.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            setIsGenerating(false);
         }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to generate image");
-      }
-
-      const data = await response.json();
-      const tmpImageUrl = data.data[0].url;
-      // convert the url here
-
-      setStoryImage(tmpImageUrl);
-      const { url } = await captureAndUploadImage(tmpImageUrl);
-      await savePage(message, url);
-    } catch (error) {
-      console.error("Error generating image:", error);
-      toast({
-        position: "bottom-right",
-        title: "Image Generation Failed",
-        description:
-          "There was an error generating the image. Please try again.",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+    };
 
     const savePage = async (message: string, image_url: string) => {
         const currentStoryId = localStorage.getItem("currentStoryId");
@@ -360,6 +388,27 @@ const StoryCreatorInner = () => {
                     />
                 </Tooltip>
             </Box>
+
+            <Modal isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Share this link</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody marginBottom={7}>
+                        <Flex>
+                            <Input
+                                value={`localhost:3000/view/${localStorage.getItem(
+                                    "currentStoryId"
+                                )}`}
+                                isReadOnly
+                            />
+                            <Button onClick={handleCopy} ml={2}>
+                                {hasCopied ? "Copied!" : "Copy"}
+                            </Button>
+                        </Flex>
+                    </ModalBody>
+                </ModalContent>
+            </Modal>
         </Box>
     );
 };
