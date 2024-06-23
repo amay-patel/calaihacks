@@ -406,14 +406,6 @@ const StoryCreatorInner = () => {
                     {dateState}
                 </Text>
 
-                {/* {mediaRecorder && (
-                    <LiveAudioVisualizer
-                        mediaRecorder={mediaRecorder}
-                        width={200}
-                        height={30}
-                    />
-                )} */}
-
                 <Box h="md">
                     {isGenerating && story.pages.length === 0 ? (
                         <ImageWithShimmer src="/defaultImgs/placeholder.png" />
@@ -430,13 +422,47 @@ const StoryCreatorInner = () => {
                     )}
                 </Box>
 
-                <Button
-                    onClick={startStopStory}
-                    isLoading={isGenerating}
-                    color={status.value === "connected" ? "red" : "green"}
-                >
-                    {status.value === "connected" ? "End Story" : "Start Story"}
-                </Button>
+                {status.value !== "connected" ? (
+                    <Button
+                        onClick={startStopStory}
+                        color="green"
+                        maxW={800}
+                        margin="auto"
+                    >
+                        Start Story
+                    </Button>
+                ) : mediaRecorder ? (
+                    <Flex gap={4} maxW={800} margin="auto">
+                        <Button
+                            flex={0.7}
+                            disabled
+                            backgroundColor="#ebebfa"
+                            p={3}
+                        >
+                            <LiveAudioVisualizer
+                                mediaRecorder={mediaRecorder}
+                                barColor="white"
+                                width={120}
+                                height={25}
+                            />
+                        </Button>
+                        <Button
+                            flex={0.3}
+                            onClick={startStopStory}
+                            colorScheme="red"
+                        >
+                            End Story
+                        </Button>
+                    </Flex>
+                ) : (
+                    <Button
+                        onClick={startStopStory}
+                        backgroundColor="#FF7F7F"
+                        color="white"
+                    >
+                        End Story
+                    </Button>
+                )}
 
                 {story.pages.length > 0 ? (
                     <Box textAlign="center">{story.pages.at(-1)!.text}</Box>
