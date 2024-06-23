@@ -13,8 +13,8 @@ const Fonts = () => (
     <Global
         styles={`
       @font-face {
-        font-family: 'WonderLight';
-        src: url('/fonts/wonder-light.ttf') format('truetype');
+        font-family: 'hartby';
+        src: url('/fonts/hartby.otf') format('opentype');
         font-weight: normal;
         font-style: normal;
       }
@@ -22,11 +22,11 @@ const Fonts = () => (
     />
 );
 
-// Extend the Chakra theme to use WonderLight as the default font
+// Extend the Chakra theme to use Hartby as the default font
 const theme = extendTheme({
     fonts: {
-        body: "WonderLight, sans-serif",
-        heading: "WonderLight, sans-serif",
+        body: "hartby, sans-serif",
+        heading: "hartby, sans-serif",
     },
     styles: {
         global: {
