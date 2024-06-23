@@ -2,6 +2,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s;
     background-color: #FEEBC8;
+    border: 1px solid rgba(0, 0, 0, 0.1);
 }
   
 .page:hover {
