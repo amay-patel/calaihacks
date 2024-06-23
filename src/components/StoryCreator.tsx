@@ -43,7 +43,10 @@ import { FaBookOpen, FaPlus } from "react-icons/fa";
 import { VoiceProvider, useVoice } from "@humeai/voice-react";
 import ImageWithShimmer from "./ImageWithShimmer";
 import { LiveAudioVisualizer } from "react-audio-visualize";
-import { fetchDallE, fetchOpenAiWithDiffusionPrompt } from "../utils/fetchOpenAi";
+import {
+  fetchDallE,
+  fetchOpenAiWithDiffusionPrompt,
+} from "../utils/fetchOpenAi";
 
 // Jotai atoms for state management
 
@@ -73,16 +76,34 @@ const StoryCreatorInner = () => {
       lastVoiceMessage?.message.content !== "" &&
       lastVoiceMessage?.message.content !== null
     ) {
+      // grab most recent message
       const recentMessage = lastVoiceMessage.message.content;
-      if (recentMessage.endsWith("?")) {
-        const newArray = messages;
+      console.log(recentMessage);
+      // end the story
+      if (
+        recentMessage.toLowerCase().endsWith("the end") ||
+        recentMessage.toLowerCase().endsWith("the end.")
+      ) {
+        const newArray = [...messages, recentMessage];
         const message = newArray.join(" ").trim();
+        console.log(message);
         setStoryText(message);
         generateImage(message);
+        setMessages([]);
+        startStopStory(); // maybe change to either stop or start and no toggling
+      } else if (recentMessage.endsWith("?")) {
+        // send to picture generation
+        const newArray = messages;
+        const message = newArray.join(" ").trim();
+        console.log(message);
+        setStoryText(message);
+        generateImage(message);
+        setMessages([]);
+      } else {
+        // append and don't send
+        const newArray = [...messages, recentMessage];
+        setMessages(newArray);
       }
-      // append
-      const newArray = [...messages, recentMessage];
-      setMessages(newArray);
     }
   }, [lastVoiceMessage?.message.content]);
 
@@ -242,13 +263,17 @@ const StoryCreatorInner = () => {
         message
       );
       const completionsResponseData = await completionsResponse.json();
-      const promptRaw: string = completionsResponseData.choices[0].message.content;
+      const promptRaw: string =
+        completionsResponseData.choices[0].message.content;
       let promptSplit = promptRaw.split(".");
-      promptSplit[0] = `${promptSplit[0]}, cute, hand-drawn illustration`
+      promptSplit[0] = `${promptSplit[0]}, cute, hand-drawn illustration`;
       const promptCommas = promptSplit.join(", ").split("\n").join("");
       const prompt = promptCommas[0].toLowerCase() + promptCommas.slice(1);
 
-      const response = await fetchDallE(apiKeys.OPENAI_API_KEY, `cute, ${prompt}`);
+      const response = await fetchDallE(
+        apiKeys.OPENAI_API_KEY,
+        `cute, ${prompt}`
+      );
 
       if (!response.ok) {
         throw new Error("Failed to generate image");
@@ -260,6 +285,7 @@ const StoryCreatorInner = () => {
 
       setStoryImage(tmpImageUrl);
       const { url } = await captureAndUploadImage(tmpImageUrl);
+      console.log("before save", message);
       await savePage(message, url);
     } catch (error) {
       console.error("Error generating image:", error);
