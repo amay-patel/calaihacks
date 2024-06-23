@@ -394,9 +394,7 @@ const StoryCreatorInner = () => {
                 </Button>
 
                 {story.pages.length > 0 ? (
-                    story.pages.map((e, index) => (
-                        <Box key={index}>{e.text}</Box>
-                    ))
+                    <Box textAlign="center">{story.pages.at(-1)!.text}</Box>
                 ) : (
                     <Box textAlign="center">Generate a Story Book!</Box>
                 )}
