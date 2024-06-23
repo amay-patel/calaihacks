@@ -63,7 +63,22 @@ const StoryCreatorInner = () => {
         }
     }, [lastVoiceMessage?.message.content]);
 
-    const toast = useToast();
+  const toast = useToast();
+
+  const captureAndUploadImage = async (image_url: string) => {
+    const response = await fetch("http://localhost:3000/upload", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ imageUrl: image_url }), // body data type must match "Content-Type" header
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json(); // parses JSON response into native JavaScript objects
+  };
 
     useEffect(() => {
         const fetchStory = async (storyId: string) => {
@@ -152,47 +167,50 @@ const StoryCreatorInner = () => {
             return;
         }
 
-        setIsGenerating(true);
-        try {
-            const response = await fetch(
-                "https://api.openai.com/v1/images/generations",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${apiKeys.OPENAI_API_KEY}`,
-                    },
-                    body: JSON.stringify({
-                        prompt: message,
-                        n: 1,
-                        size: "512x512",
-                    }),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to generate image");
-            }
-
-            const data = await response.json();
-            const tmpImageUrl = data.data[0].url;
-            setStoryImage(tmpImageUrl);
-            await savePage(message, tmpImageUrl);
-        } catch (error) {
-            console.error("Error generating image:", error);
-            toast({
-                position: "bottom-right",
-                title: "Image Generation Failed",
-                description:
-                    "There was an error generating the image. Please try again.",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-            });
-        } finally {
-            setIsGenerating(false);
+    setIsGenerating(true);
+    try {
+      const response = await fetch(
+        "https://api.openai.com/v1/images/generations",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${apiKeys.OPENAI_API_KEY}`,
+          },
+          body: JSON.stringify({
+            prompt: message,
+            n: 1,
+            size: "512x512",
+          }),
         }
-    };
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate image");
+      }
+
+      const data = await response.json();
+      const tmpImageUrl = data.data[0].url;
+      // convert the url here
+
+      setStoryImage(tmpImageUrl);
+      const { url } = await captureAndUploadImage(tmpImageUrl);
+      await savePage(message, url);
+    } catch (error) {
+      console.error("Error generating image:", error);
+      toast({
+        position: "bottom-right",
+        title: "Image Generation Failed",
+        description:
+          "There was an error generating the image. Please try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
     const savePage = async (message: string, image_url: string) => {
         const currentStoryId = localStorage.getItem("currentStoryId");

@@ -29,13 +29,13 @@ const StoryPage = React.forwardRef<
             <Flex p={4}>
                 {pageNumber % 2 === 0 ? (
                     <>
+                      <Spacer />
                         <div>{pageNumber}</div>
-                        <Spacer />
                     </>
                 ) : (
                     <>
-                        <Spacer />
                         <div>{pageNumber}</div>
+                        <Spacer />
                     </>
                 )}
             </Flex>
