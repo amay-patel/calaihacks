@@ -28,7 +28,7 @@ import {
 } from "../state/currentStory";
 import { allStoriesAtom, storyAtom } from "../state/story";
 import { fetchAccessToken } from "@humeai/voice";
-import { FaBookOpen, FaPencilAlt, FaPlus } from "react-icons/fa";
+import { FaBookOpen, FaPlus } from "react-icons/fa";
 import { VoiceProvider, useVoice } from "@humeai/voice-react";
 import ImageWithShimmer from "./ImageWithShimmer";
 
@@ -281,8 +281,8 @@ const StoryCreatorInner = () => {
                     Interactive Storybook Creator
                 </Text>
 
-                <Box h="xs">
-                    {isGenerating ? (
+                <Box h="md">
+                    {isGenerating && story.pages.length === 0 ? (
                         <ImageWithShimmer src="/defaultImgs/placeholder.png" />
                     ) : (
                         <Image
@@ -321,7 +321,6 @@ const StoryCreatorInner = () => {
                             icon={<FaBookOpen />}
                             aria-label="Browse"
                             mr={2}
-                            onClick={() => console.log("Edit clicked")}
                         />
                     </Tooltip>
                     <MenuList maxHeight="600px" overflowY="auto">
@@ -368,7 +367,7 @@ const StoryCreator = () => {
     return (
         <VoiceProvider
             auth={{ type: "accessToken", value: accessToken }}
-            configId="75c86545-f045-447c-9355-740536170928"
+            configId="d615bf07-8989-4514-8401-13e47804c6ad"
         >
             <StoryCreatorInner />
         </VoiceProvider>
