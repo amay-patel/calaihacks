@@ -59,7 +59,7 @@ const StoryCreatorInner = () => {
     const [isGenerating, setIsGenerating] = useState(false);
     const [story, setStory] = useAtom(storyAtom);
     const { hasCopied, onCopy } = useClipboard(
-        `localhost:3000/view/${localStorage.getItem("currentStoryId")}`
+        `localhost:3001/view/${localStorage.getItem("currentStoryId")}`
     );
     const { connect, disconnect, status, lastVoiceMessage } = useVoice();
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>();
@@ -392,13 +392,13 @@ const StoryCreatorInner = () => {
                     Interactive Storybook Creator
                 </Text>
 
-                {mediaRecorder && (
+                {/* {mediaRecorder && (
                     <LiveAudioVisualizer
                         mediaRecorder={mediaRecorder}
                         width={200}
                         height={30}
                     />
-                )}
+                )} */}
 
                 <Box h="md">
                     {isGenerating && story.pages.length === 0 ? (
@@ -468,7 +468,7 @@ const StoryCreatorInner = () => {
                     <ModalBody marginBottom={7}>
                         <Flex>
                             <Input
-                                value={`localhost:3000/view/${localStorage.getItem(
+                                value={`localhost:3001/view/${localStorage.getItem(
                                     "currentStoryId"
                                 )}`}
                                 isReadOnly
