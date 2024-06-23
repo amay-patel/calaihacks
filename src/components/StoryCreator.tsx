@@ -14,8 +14,9 @@ import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correc
 import { addPageToStory, createStory, getStory } from "../firebase/firebase";
 import { storyImageAtom, storyTextAtom } from "../state/currentStory";
 import { storyAtom } from "../state/story";
-import { fetchAccessToken } from '@humeai/voice';
-import { VoiceProvider, useVoice } from '@humeai/voice-react';
+import { fetchAccessToken } from "@humeai/voice";
+import { VoiceProvider, useVoice } from "@humeai/voice-react";
+import ImageWithShimmer from "./ImageWithShimmer";
 
 // Jotai atoms for state management
 
@@ -29,19 +30,23 @@ const StoryCreatorInner = () => {
     const [messages, setMessages] = useState<string[]>([]);
 
     useEffect(() => {
-        console.log(status)
-    }, [status])
+        console.log(status);
+    }, [status]);
 
     useEffect(() => {
         // updates the messages from the bot
-        if (lastVoiceMessage != null && lastVoiceMessage?.message.content !== '' && lastVoiceMessage?.message.content !== null) {
+        if (
+            lastVoiceMessage != null &&
+            lastVoiceMessage?.message.content !== "" &&
+            lastVoiceMessage?.message.content !== null
+        ) {
             // const newArray = [...messages, lastVoiceMessage.message.content]
-            setMessages([lastVoiceMessage.message.content])
+            setMessages([lastVoiceMessage.message.content]);
             // const message = newArray.join(' ').trim()
-            setStoryText(lastVoiceMessage.message.content)
-            generateImage(lastVoiceMessage.message.content)
+            setStoryText(lastVoiceMessage.message.content);
+            generateImage(lastVoiceMessage.message.content);
         }
-    }, [lastVoiceMessage?.message.content])
+    }, [lastVoiceMessage?.message.content]);
 
     const toast = useToast();
 
@@ -94,19 +99,19 @@ const StoryCreatorInner = () => {
 
     const startStopStory = async () => {
         setIsGenerating(true);
-        if (status.value === 'connected') {
+        if (status.value === "connected") {
             disconnect();
             return;
-          }
-          void connect()
+        }
+        void connect()
             .then(() => {})
             .catch((e) => {
-              console.error(e);
+                console.error(e);
             });
         setIsGenerating(false);
     };
 
-    const generateImage = async (message:string) => {
+    const generateImage = async (message: string) => {
         if (!apiKeys.OPENAI_API_KEY) {
             toast({
                 title: "API Key Missing",
@@ -141,7 +146,7 @@ const StoryCreatorInner = () => {
             }
 
             const data = await response.json();
-            const tmpImageUrl = data.data[0].url
+            const tmpImageUrl = data.data[0].url;
             setStoryImage(tmpImageUrl);
             await savePage(message, tmpImageUrl);
         } catch (error) {
@@ -159,7 +164,7 @@ const StoryCreatorInner = () => {
         }
     };
 
-    const savePage = async (message:string, image_url:string) => {
+    const savePage = async (message: string, image_url: string) => {
         const currentStoryId = localStorage.getItem("currentStoryId");
         if (!currentStoryId) {
             toast({
@@ -220,15 +225,19 @@ const StoryCreatorInner = () => {
 
                 <HStack>
                     <Box flex={1}>
-                        <Image
-                            src={storyImage}
-                            alt="Story illustration"
-                            objectFit="cover"
-                            boxSize="300px"
-                            width="100%"
-                            height="100%"
-                            borderRadius="0.5rem"
-                        />
+                        {isGenerating ? (
+                            <ImageWithShimmer src="/defaultImgs/placeholder.png" />
+                        ) : (
+                            <Image
+                                src={storyImage}
+                                alt="Story illustration"
+                                objectFit="cover"
+                                boxSize="300px"
+                                width="100%"
+                                height="100%"
+                                borderRadius="0.5rem"
+                            />
+                        )}
                     </Box>
                     <VStack flex={1} align="stretch" spacing={4}>
                         <Textarea
@@ -241,8 +250,13 @@ const StoryCreatorInner = () => {
                         <Button
                             onClick={startStopStory}
                             isLoading={isGenerating}
+                            color={
+                                status.value === "connected" ? "red" : "green"
+                            }
                         >
-                            {status.value === 'connected' ? 'Stop' : 'Start chat'}
+                            {status.value === "connected"
+                                ? "End Story"
+                                : "Start chat"}
                         </Button>
                     </VStack>
                 </HStack>
@@ -255,30 +269,31 @@ const StoryCreatorInner = () => {
 };
 
 const StoryCreator = () => {
-    const [accessToken, setAccessToken] = useState('');
+    const [accessToken, setAccessToken] = useState("");
     const [apiKeys] = useAtom(apiKeysAtom);
 
     const fetchToken = async () => {
         // make sure to set these environment variables
-        const apiKey = apiKeys.HUME_API_KEY
-        const secretKey = apiKeys.HUME_SECRET_KEY
+        const apiKey = apiKeys.HUME_API_KEY;
+        const secretKey = apiKeys.HUME_SECRET_KEY;
         const token = await fetchAccessToken({ apiKey, secretKey });
         setAccessToken(token);
-      };
+    };
 
     useEffect(() => {
-        if (apiKeys.HUME_API_KEY && apiKeys.HUME_SECRET_KEY){
-      fetchToken();}
+        if (apiKeys.HUME_API_KEY && apiKeys.HUME_SECRET_KEY) {
+            fetchToken();
+        }
     }, [apiKeys]);
 
     return (
-    <VoiceProvider 
-        auth={{ type: 'accessToken', value: accessToken  }}
-        configId='75c86545-f045-447c-9355-740536170928'
-    >
-      <StoryCreatorInner/>
-    </VoiceProvider>);
-
-}
+        <VoiceProvider
+            auth={{ type: "accessToken", value: accessToken }}
+            configId="75c86545-f045-447c-9355-740536170928"
+        >
+            <StoryCreatorInner />
+        </VoiceProvider>
+    );
+};
 
 export default StoryCreator;
