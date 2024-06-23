@@ -1,11 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { Box, VStack, Text, Button, Image, useToast } from "@chakra-ui/react";
+import {
+    Box,
+    VStack,
+    Text,
+    Button,
+    Image,
+    useToast,
+    IconButton,
+    Tooltip,
+    MenuList,
+    MenuItem,
+    MenuButton,
+    Menu,
+} from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
 import { addPageToStory, createStory, getStory } from "../firebase/firebase";
-import { storyImageAtom, storyTextAtom } from "../state/currentStory";
+import {
+    getRandomImage,
+    storyImageAtom,
+    storyTextAtom,
+} from "../state/currentStory";
 import { storyAtom } from "../state/story";
 import { fetchAccessToken } from "@humeai/voice";
+import { FaBookOpen, FaPencilAlt, FaPlus } from "react-icons/fa";
 import { VoiceProvider, useVoice } from "@humeai/voice-react";
 import ImageWithShimmer from "./ImageWithShimmer";
 
@@ -46,6 +64,9 @@ const StoryCreatorInner = () => {
             const firebaseStory = await getStory(storyId);
             if (firebaseStory) {
                 setStory(firebaseStory);
+                if (firebaseStory.pages.length > 0) {
+                    setStoryImage(firebaseStory.pages.at(-1)?.image_url!);
+                }
             }
         };
 
@@ -70,6 +91,7 @@ const StoryCreatorInner = () => {
         try {
             const newStoryId = await createStory([]);
             localStorage.setItem("currentStoryId", newStoryId);
+            setStoryImage(getRandomImage());
             toast({
                 position: "bottom-right",
                 title: "New Story Created",
@@ -217,7 +239,7 @@ const StoryCreatorInner = () => {
 
     return (
         <Box p={5} maxWidth="800px" margin="auto">
-            <VStack spacing={6} align="stretch">
+            <VStack spacing={6} align="stretch" marginTop="2rem">
                 <Text fontSize="2xl" fontWeight="bold" textAlign="center">
                     Interactive Storybook Creator
                 </Text>
@@ -254,6 +276,43 @@ const StoryCreatorInner = () => {
                     <Box textAlign="center">Generate a Story Book!</Box>
                 )}
             </VStack>
+            <Box position="fixed" top={4} right={4} zIndex={10}>
+                <Menu>
+                    <Tooltip label="Browse Stories" aria-label="Edit tooltip">
+                        <MenuButton
+                            as={IconButton}
+                            icon={<FaBookOpen />}
+                            aria-label="Browse"
+                            mr={2}
+                            onClick={() => console.log("Edit clicked")}
+                        />
+                    </Tooltip>
+                    <MenuList>
+                        <MenuItem
+                            onClick={() => console.log("Option 1 clicked")}
+                        >
+                            Option 1
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() => console.log("Option 2 clicked")}
+                        >
+                            Option 2
+                        </MenuItem>
+                        <MenuItem
+                            onClick={() => console.log("Option 3 clicked")}
+                        >
+                            Option 3
+                        </MenuItem>
+                    </MenuList>
+                </Menu>
+                <Tooltip label="Create New Story" aria-label="Edit tooltip">
+                    <IconButton
+                        icon={<FaPlus />}
+                        aria-label="Add"
+                        onClick={initializeNewStory}
+                    />
+                </Tooltip>
+            </Box>
         </Box>
     );
 };
