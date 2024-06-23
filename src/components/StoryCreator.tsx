@@ -398,7 +398,7 @@ const StoryCreatorInner = () => {
 
     return (
         <Box p={5} maxWidth="800px" margin="auto">
-            <VStack spacing={6} align="stretch" marginTop="2rem">
+            <VStack spacing={6} align="stretch" marginTop="2.5rem">
                 <Text fontSize="2xl" fontWeight="bold" textAlign="center">
                     StoryBook AI
                 </Text>
@@ -422,7 +422,7 @@ const StoryCreatorInner = () => {
                     )}
                 </Box>
 
-                {status.value === "connected" ? (
+                {status.value !== "connected" ? (
                     <Button
                         onClick={startStopStory}
                         color="green"
