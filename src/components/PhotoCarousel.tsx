@@ -80,12 +80,12 @@ import { Box } from '@chakra-ui/react';
 const StoryPage = React.forwardRef<HTMLDivElement, Page>(({ image_url, text, audio_url }, ref) => {
   return (
     <div ref={ref}>
-      <Center height="100%" p={8}>
-      <VStack spacing={4}>
-        <Image src={image_url} alt="" boxSize="400px" objectFit="cover" />
-        <Text>{text}</Text>
-        {audio_url && <audio controls src={audio_url} />}
-      </VStack>
+      <Center height="100%" p={8} backgroundColor="#FEEBC8">
+        <VStack spacing={4}>
+          <Image src={image_url} alt="" boxSize="400px" objectFit="cover" />
+          <Text>{text}</Text>
+          {audio_url && <audio controls src={audio_url} />}
+        </VStack>
       </Center>
     </div>
   );
@@ -117,7 +117,7 @@ const PhotoCarousel: React.FC = () => {
   }
 
   return (
-    <Box borderWidth={3}>
+    <Box borderWidth={3} backgroundColor="#FEEBC8">
       {/* @ts-ignore */}
       <HTMLFlipBook width={550}
             height={733}
