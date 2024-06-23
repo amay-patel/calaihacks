@@ -14,15 +14,35 @@ import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correc
 import { addPageToStory, createStory, getStory } from "../firebase/firebase";
 import { storyImageAtom, storyTextAtom } from "../state/currentStory";
 import { storyAtom } from "../state/story";
+import { fetchAccessToken } from '@humeai/voice';
+import { VoiceProvider, useVoice } from '@humeai/voice-react';
 
 // Jotai atoms for state management
 
-const StoryCreator = () => {
+const StoryCreatorInner = () => {
     const [storyText, setStoryText] = useAtom(storyTextAtom);
     const [storyImage, setStoryImage] = useAtom(storyImageAtom);
     const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
     const [story, setStory] = useAtom(storyAtom);
+    const { connect, disconnect, status, lastVoiceMessage } = useVoice();
+    const [messages, setMessages] = useState<string[]>([]);
+
+    useEffect(() => {
+        console.log(status)
+    }, [status])
+
+    useEffect(() => {
+        // updates the messages from the bot
+        if (lastVoiceMessage != null && lastVoiceMessage?.message.content !== '' && lastVoiceMessage?.message.content !== null) {
+            // const newArray = [...messages, lastVoiceMessage.message.content]
+            setMessages([lastVoiceMessage.message.content])
+            // const message = newArray.join(' ').trim()
+            setStoryText(lastVoiceMessage.message.content)
+            generateImage(lastVoiceMessage.message.content)
+        }
+    }, [lastVoiceMessage?.message.content])
+
     const toast = useToast();
 
     useEffect(() => {
@@ -72,15 +92,21 @@ const StoryCreator = () => {
         }
     };
 
-    const generateStory = async () => {
+    const startStopStory = async () => {
         setIsGenerating(true);
-        // Simulating API call to OpenAI for story generation
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        setStoryText("Once upon a time, in a magical kingdom...");
+        if (status.value === 'connected') {
+            disconnect();
+            return;
+          }
+          void connect()
+            .then(() => {})
+            .catch((e) => {
+              console.error(e);
+            });
         setIsGenerating(false);
     };
 
-    const generateImage = async () => {
+    const generateImage = async (message:string) => {
         if (!apiKeys.OPENAI_API_KEY) {
             toast({
                 title: "API Key Missing",
@@ -103,7 +129,7 @@ const StoryCreator = () => {
                         Authorization: `Bearer ${apiKeys.OPENAI_API_KEY}`,
                     },
                     body: JSON.stringify({
-                        prompt: storyText || "A magical storybook scene",
+                        prompt: message,
                         n: 1,
                         size: "512x512",
                     }),
@@ -115,7 +141,9 @@ const StoryCreator = () => {
             }
 
             const data = await response.json();
-            setStoryImage(data.data[0].url);
+            const tmpImageUrl = data.data[0].url
+            setStoryImage(tmpImageUrl);
+            await savePage(message, tmpImageUrl);
         } catch (error) {
             console.error("Error generating image:", error);
             toast({
@@ -131,7 +159,7 @@ const StoryCreator = () => {
         }
     };
 
-    const savePage = async () => {
+    const savePage = async (message:string, image_url:string) => {
         const currentStoryId = localStorage.getItem("currentStoryId");
         if (!currentStoryId) {
             toast({
@@ -146,8 +174,8 @@ const StoryCreator = () => {
 
         try {
             await addPageToStory(currentStoryId, {
-                text: storyText,
-                image_url: storyImage,
+                text: message,
+                image_url: image_url,
                 audio_url: "", // We're not handling audio yet, so leaving this empty
             });
             setStory({
@@ -155,8 +183,8 @@ const StoryCreator = () => {
                 pages: [
                     ...story.pages,
                     {
-                        text: storyText,
-                        image_url: storyImage,
+                        text: message,
+                        image_url: image_url,
                         audio_url: "", // We're not handling audio yet, so leaving this empty
                     },
                 ],
@@ -169,8 +197,8 @@ const StoryCreator = () => {
                 isClosable: true,
             });
             // Clear the current page content
-            setStoryText("");
-            setStoryImage("/images/placeholder.jpg");
+            // setStoryText("");
+            // setStoryImage("/images/placeholder.jpg");
         } catch (error) {
             console.error("Error saving page:", error);
             toast({
@@ -211,23 +239,13 @@ const StoryCreator = () => {
                             minHeight="200px"
                         />
                         <Button
-                            onClick={generateStory}
+                            onClick={startStopStory}
                             isLoading={isGenerating}
                         >
-                            Generate Story
-                        </Button>
-                        <Button
-                            onClick={generateImage}
-                            isLoading={isGenerating}
-                        >
-                            Generate Image
-                        </Button>
-                        <Button onClick={savePage} colorScheme="green">
-                            Save Page
+                            {status.value === 'connected' ? 'Stop' : 'Start chat'}
                         </Button>
                     </VStack>
                 </HStack>
-
                 {story.pages.map((e, index) => (
                     <Box key={index}>{e.text}</Box>
                 ))}
@@ -235,5 +253,32 @@ const StoryCreator = () => {
         </Box>
     );
 };
+
+const StoryCreator = () => {
+    const [accessToken, setAccessToken] = useState('');
+    const [apiKeys] = useAtom(apiKeysAtom);
+
+    const fetchToken = async () => {
+        // make sure to set these environment variables
+        const apiKey = apiKeys.HUME_API_KEY
+        const secretKey = apiKeys.HUME_SECRET_KEY
+        const token = await fetchAccessToken({ apiKey, secretKey });
+        setAccessToken(token);
+      };
+
+    useEffect(() => {
+        if (apiKeys.HUME_API_KEY && apiKeys.HUME_SECRET_KEY){
+      fetchToken();}
+    }, [apiKeys]);
+
+    return (
+    <VoiceProvider 
+        auth={{ type: 'accessToken', value: accessToken  }}
+        configId='75c86545-f045-447c-9355-740536170928'
+    >
+      <StoryCreatorInner/>
+    </VoiceProvider>);
+
+}
 
 export default StoryCreator;
