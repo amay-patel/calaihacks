@@ -30,8 +30,8 @@ const StoryPage = React.forwardRef<
     pageNumber: number;
     handler: (inputValue: string) => void;
     readyState: string;
-    isPlaying: boolean;
-    setIsPlaying: React.Dispatch<React.SetStateAction<boolean>>;
+    isPlaying: number;
+    setIsPlaying: React.Dispatch<React.SetStateAction<number>>;
   }
 >(
   (
@@ -68,11 +68,15 @@ const StoryPage = React.forwardRef<
             {readyState === "open" && (
               <IconButton
                 aria-label="play button"
-                onClick={() => {
-                  setIsPlaying(true);
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIsPlaying(pageNumber);
                   handler(text);
                 }}
-                isLoading={isPlaying}
+                isLoading={isPlaying === pageNumber}
+                isDisabled={
+                  isPlaying === -1 || isPlaying === pageNumber ? false : true
+                }
                 // color={"green"}
                 backgroundColor={"lightgreen"}
                 icon={<FaMusic />}
@@ -96,7 +100,7 @@ const PhotoCarousel: React.FC = () => {
 
   const audioQueue: Blob[] = [];
   let isPlaying = false;
-  const [playing, setPlaying] = useState(false);
+  const [playing, setPlaying] = useState(-1);
   let currentAudio: HTMLAudioElement | null = null;
   const mimeType: string = "audio/mpeg";
 
@@ -158,7 +162,7 @@ const PhotoCarousel: React.FC = () => {
       if (audioQueue.length) {
         playAudio();
       } else {
-        setPlaying(false);
+        setPlaying(-1);
       }
     };
   }
@@ -250,6 +254,7 @@ const PhotoCarousel: React.FC = () => {
           maxShadowOpacity={0.5}
           showCover={false}
           mobileScrollSupport={true}
+          disableFlipByClick
         >
           {story.pages.map((page, index) => (
             <StoryPage
