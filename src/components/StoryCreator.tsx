@@ -49,6 +49,7 @@ import {
 } from "../utils/fetchOpenAi";
 import { formatDatetime } from "../utils/formatDatetime";
 import { IoMdMic, IoMdMicOff } from "react-icons/io";
+import { topProsodyAtom } from "../state/prosody";
 
 // Jotai atoms for state management
 
@@ -61,7 +62,6 @@ const StoryCreatorInner = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [story, setStory] = useAtom(storyAtom);
   const [globalMuted, setGlobalMuted] = useState(false);
-  const [emotion, setEmotion] = useState("");
   const { hasCopied, onCopy } = useClipboard(
     `localhost:3001/view/${localStorage.getItem("currentStoryId")}`
   );
@@ -78,6 +78,20 @@ const StoryCreatorInner = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [messages, setMessages] = useState<string[]>([]);
   const [dateState, setDate] = useState<any | null>(null);
+  const [topProsody, setTopProsody] = useAtom<string>(topProsodyAtom);
+
+  const prosody = lastVoiceMessage?.models.prosody?.scores ?? {};
+  useEffect(() => {
+    const myObj = prosody;
+    const newTopProsody = Object.keys(myObj).reduce((a, b) =>
+      typeof myObj[a] === "number" &&
+      typeof myObj[b] === "number" &&
+      myObj[a] > myObj[b]
+        ? a
+        : b
+    );
+    setTopProsody(newTopProsody);
+  }, [lastVoiceMessage]);
 
   useEffect(() => {
     console.log(status);
@@ -104,7 +118,6 @@ const StoryCreatorInner = () => {
         // Otherwise, keep the highest we've seen so far
         return current[1] > highest[1] ? current : highest;
       });
-      setEmotion(highestKey);
       // mute the user
       mute();
       // grab most recent message
@@ -313,8 +326,9 @@ const StoryCreatorInner = () => {
       const completionsResponseData = await completionsResponse.json();
       const promptRaw: string =
         completionsResponseData.choices[0].message.content;
+      const extraAttribute = topProsody ? `, ${topProsody}` : "";
       let promptSplit = promptRaw.split(".");
-      promptSplit[0] = `${promptSplit[0]}, cute, hand-drawn illustration`;
+      promptSplit[0] = `${promptSplit[0]}, hand-drawn illustration${extraAttribute}`;
       const promptCommas = promptSplit.join(", ").split("\n").join("");
       const prompt = promptCommas[0].toLowerCase() + promptCommas.slice(1);
 
