@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-    Box,
-    VStack,
-    HStack,
-    Text,
-    Button,
-    Textarea,
-    Image,
-    useToast,
-} from "@chakra-ui/react";
+import { Box, VStack, Text, Button, Image, useToast } from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
 import { addPageToStory, createStory, getStory } from "../firebase/firebase";
@@ -65,6 +56,7 @@ const StoryCreatorInner = () => {
         } else {
             fetchStory(existingStoryId);
             toast({
+                position: "bottom-right",
                 title: "Existing Story Loaded",
                 description: `Story ID: ${existingStoryId}`,
                 status: "info",
@@ -79,6 +71,7 @@ const StoryCreatorInner = () => {
             const newStoryId = await createStory([]);
             localStorage.setItem("currentStoryId", newStoryId);
             toast({
+                position: "bottom-right",
                 title: "New Story Created",
                 description: `Story ID: ${newStoryId}`,
                 status: "success",
@@ -88,6 +81,7 @@ const StoryCreatorInner = () => {
         } catch (error) {
             console.error("Error creating new story:", error);
             toast({
+                position: "bottom-right",
                 title: "Error",
                 description: "Failed to create a new story.",
                 status: "error",
@@ -114,6 +108,7 @@ const StoryCreatorInner = () => {
     const generateImage = async (message: string) => {
         if (!apiKeys.OPENAI_API_KEY) {
             toast({
+                position: "bottom-right",
                 title: "API Key Missing",
                 description: "Please set your OpenAI API key in the settings.",
                 status: "error",
@@ -152,6 +147,7 @@ const StoryCreatorInner = () => {
         } catch (error) {
             console.error("Error generating image:", error);
             toast({
+                position: "bottom-right",
                 title: "Image Generation Failed",
                 description:
                     "There was an error generating the image. Please try again.",
@@ -168,6 +164,7 @@ const StoryCreatorInner = () => {
         const currentStoryId = localStorage.getItem("currentStoryId");
         if (!currentStoryId) {
             toast({
+                position: "bottom-right",
                 title: "Error",
                 description: "No active story. Please refresh the page.",
                 status: "error",
@@ -195,6 +192,7 @@ const StoryCreatorInner = () => {
                 ],
             });
             toast({
+                position: "bottom-right",
                 title: "Page Saved",
                 description: "The current page has been added to the story.",
                 status: "success",
@@ -207,6 +205,7 @@ const StoryCreatorInner = () => {
         } catch (error) {
             console.error("Error saving page:", error);
             toast({
+                position: "bottom-right",
                 title: "Error",
                 description: "Failed to save the page. Please try again.",
                 status: "error",
@@ -223,46 +222,37 @@ const StoryCreatorInner = () => {
                     Interactive Storybook Creator
                 </Text>
 
-                <HStack>
-                    <Box flex={1}>
-                        {isGenerating ? (
-                            <ImageWithShimmer src="/defaultImgs/placeholder.png" />
-                        ) : (
-                            <Image
-                                src={storyImage}
-                                alt="Story illustration"
-                                objectFit="cover"
-                                boxSize="300px"
-                                width="100%"
-                                height="100%"
-                                borderRadius="0.5rem"
-                            />
-                        )}
-                    </Box>
-                    <VStack flex={1} align="stretch" spacing={4}>
-                        <Textarea
-                            backgroundColor={"white"}
-                            value={storyText}
-                            onChange={(e) => setStoryText(e.target.value)}
-                            placeholder="Your story will appear here..."
-                            minHeight="200px"
+                <Box h="xs">
+                    {isGenerating ? (
+                        <ImageWithShimmer src="/defaultImgs/placeholder.png" />
+                    ) : (
+                        <Image
+                            src={storyImage}
+                            alt="Story illustration"
+                            objectFit="cover"
+                            boxSize="300px"
+                            width="100%"
+                            height="100%"
+                            borderRadius="0.5rem"
                         />
-                        <Button
-                            onClick={startStopStory}
-                            isLoading={isGenerating}
-                            color={
-                                status.value === "connected" ? "red" : "green"
-                            }
-                        >
-                            {status.value === "connected"
-                                ? "End Story"
-                                : "Start chat"}
-                        </Button>
-                    </VStack>
-                </HStack>
-                {story.pages.map((e, index) => (
-                    <Box key={index}>{e.text}</Box>
-                ))}
+                    )}
+                </Box>
+
+                <Button
+                    onClick={startStopStory}
+                    isLoading={isGenerating}
+                    color={status.value === "connected" ? "red" : "green"}
+                >
+                    {status.value === "connected" ? "End Story" : "Start Story"}
+                </Button>
+
+                {story.pages.length > 0 ? (
+                    story.pages.map((e, index) => (
+                        <Box key={index}>{e.text}</Box>
+                    ))
+                ) : (
+                    <Box textAlign="center">Generate a Story Book!</Box>
+                )}
             </VStack>
         </Box>
     );

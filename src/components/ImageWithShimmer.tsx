@@ -29,6 +29,7 @@ const ShimmerEffect = () => {
             top="-25%" // Offset to ensure full coverage
             left="-25%" // Offset to ensure full coverage
             transform="skewX(-30deg)" // Apply the slant
+            borderRadius="0.5rem"
             zIndex={1}
             opacity={0.9}
         >
@@ -37,6 +38,7 @@ const ShimmerEffect = () => {
                 width="50%"
                 background="linear-gradient(to right, transparent 0%, rgba(255,255,255,0.8) 85%, transparent 100%)"
                 position="absolute"
+                borderRadius="0.5rem"
                 animation={animation}
             />
         </Box>
@@ -47,8 +49,11 @@ const ImageWithShimmer = ({ src }: any) => {
     return (
         <Box
             position="relative"
+            boxSize="300px"
             width="100%"
-            paddingBottom="56.25%"
+            borderRadius="0.5rem"
+            height="100%"
+            // paddingBottom="56.25%"
             overflow="hidden"
         >
             <ShimmerEffect />
