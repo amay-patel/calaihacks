@@ -42,6 +42,7 @@ import { fetchAccessToken } from "@humeai/voice";
 import { FaBookOpen, FaPlus } from "react-icons/fa";
 import { VoiceProvider, useVoice } from "@humeai/voice-react";
 import ImageWithShimmer from "./ImageWithShimmer";
+import { LiveAudioVisualizer } from "react-audio-visualize";
 
 // Jotai atoms for state management
 
@@ -56,6 +57,7 @@ const StoryCreatorInner = () => {
         `localhost:3000/view/${localStorage.getItem("currentStoryId")}`
     );
     const { connect, disconnect, status, lastVoiceMessage } = useVoice();
+    const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [messages, setMessages] = useState<string[]>([]);
 
@@ -77,6 +79,37 @@ const StoryCreatorInner = () => {
             generateImage(lastVoiceMessage.message.content);
         }
     }, [lastVoiceMessage?.message.content]);
+
+    // useEffect(() => {
+    //     async function setupMediaRecorder() {
+    //       try {
+    //         const stream = await navigator.mediaDevices.getUserMedia({
+    //           audio: true,
+    //         });
+    //         const recorder = new MediaRecorder(stream);
+    //         setMediaRecorder(recorder);
+    //       } catch (err) {
+    //         console.error("Error accessing media devices.", err);
+    //       }
+    //     }
+
+    //     setupMediaRecorder();
+
+    //     // Cleanup function
+    //     return () => {
+    //       if (mediaRecorder && mediaRecorder.state !== "inactive") {
+    //         mediaRecorder.stop();
+    //       }
+    //     };
+    //   }, []);
+
+    //   useEffect(() => {
+    //     audioContextRef.current = new (window.AudioContext ||
+    //       window.webkitAudioContext)();
+    //     if (mediaRecorder && mediaRecorder.state === "inactive") {
+    //       mediaRecorder.start();
+    //     }
+    //   }, [mediaRecorder]);
 
     const toast = useToast();
 
@@ -144,6 +177,7 @@ const StoryCreatorInner = () => {
         try {
             const newStoryId = await createStory([]);
             localStorage.setItem("currentStoryId", newStoryId);
+            setStory({ pages: [] });
             setStoryImage(getRandomImage());
             toast({
                 position: "bottom-right",
@@ -326,6 +360,14 @@ const StoryCreatorInner = () => {
                 <Text fontSize="2xl" fontWeight="bold" textAlign="center">
                     Interactive Storybook Creator
                 </Text>
+
+                {/* {mediaRecorder && (
+        <LiveAudioVisualizer
+          mediaRecorder={mediaRecorder}
+          width={200}
+          height={75}
+        />
+      )} */}
 
                 <Box h="md">
                     {isGenerating && story.pages.length === 0 ? (
