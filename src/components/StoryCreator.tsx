@@ -50,6 +50,7 @@ import {
 import { formatDatetime } from "../utils/formatDatetime";
 import { IoMdMic, IoMdMicOff } from "react-icons/io";
 import { topProsodyAtom } from "../state/prosody";
+import { getFaceByEmotion } from "../utils/emotionFaces";
 
 // Jotai atoms for state management
 
@@ -569,7 +570,9 @@ const StoryCreatorInner = () => {
           />
         </Tooltip>
       </Box>
-
+      <Box position="fixed" top="16px" left="16px" zIndex="sticky">
+        {getFaceByEmotion(topProsody)}
+      </Box>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
