@@ -76,6 +76,7 @@ const StoryCreatorInner = () => {
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [messages, setMessages] = useState<string[]>([]);
+  const [dateState, setDate] = useState<any | null>(null);
 
   useEffect(() => {
     console.log(status);
@@ -109,7 +110,7 @@ const StoryCreatorInner = () => {
         setStoryText(message);
         generateImage(message);
         setMessages([]);
-        closeConnection(); // maybe change to either stop or start and no toggling
+        startStopStory(); // maybe change to either stop or start and no toggling
         if (!globalMuted) {
           unmute();
         }
@@ -196,6 +197,10 @@ const StoryCreatorInner = () => {
       const firebaseStory = await getStory(storyId);
       if (firebaseStory) {
         setStory(firebaseStory);
+        console.log(firebaseStory);
+        if (firebaseStory.datetime) {
+          setDate(formatDatetime(firebaseStory.datetime));
+        }
         if (firebaseStory.pages.length > 0) {
           setStoryImage(firebaseStory.pages.at(-1)?.image_url!);
         }
@@ -227,9 +232,14 @@ const StoryCreatorInner = () => {
 
   const initializeNewStory = async () => {
     try {
-      const newStoryId = await createStory([]);
+      const datetime = new Date().toISOString();
+      const newStoryId = await createStory({
+        pages: [],
+        datetime: datetime,
+      });
       localStorage.setItem("currentStoryId", newStoryId);
-      setStory({ pages: [], datetime: new Date().toISOString() });
+      setStory({ pages: [], datetime: datetime });
+      setDate(formatDatetime(story.datetime));
       setStoryImage(getRandomImage());
       toast({
         position: "bottom-right",
@@ -249,16 +259,6 @@ const StoryCreatorInner = () => {
         duration: 5000,
         isClosable: true,
       });
-    }
-  };
-
-  const closeConnection = async () => {
-    if (status.value === "connected") {
-      disconnect();
-      // pop modal
-      onOpen();
-      setIsGenerating(false);
-      return;
     }
   };
 
@@ -426,7 +426,7 @@ const StoryCreatorInner = () => {
           StoryBook AI
         </Text>
         <Text color="gray" textAlign="center">
-          {story.datetime && formatDatetime(story.datetime)}
+          {dateState}
         </Text>
 
         {/* {mediaRecorder && (

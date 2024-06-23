@@ -30,10 +30,10 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // Helper function to create a new story
-export const createStory = async (pages: Page[]): Promise<string> => {
+export const createStory = async (story: Story): Promise<string> => {
     try {
         const storiesRef = collection(db, "stories");
-        const newStoryRef = await addDoc(storiesRef, { pages });
+        const newStoryRef = await addDoc(storiesRef, story);
         return newStoryRef.id;
     } catch (error) {
         console.error("Error creating story:", error);
