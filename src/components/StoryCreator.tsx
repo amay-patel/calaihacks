@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
-import { addPageToStory, createStory } from "../firebase/firebase";
+import { addPageToStory, createStory, getStory } from "../firebase/firebase";
 import { storyImageAtom, storyTextAtom } from "../state/currentStory";
 import { storyAtom } from "../state/story";
 
@@ -26,11 +26,19 @@ const StoryCreator = () => {
     const toast = useToast();
 
     useEffect(() => {
+        const fetchStory = async (storyId: string) => {
+            const firebaseStory = await getStory(storyId);
+            if (firebaseStory) {
+                setStory(firebaseStory);
+            }
+        };
+
         // Check if there's an existing story ID in localStorage
         const existingStoryId = localStorage.getItem("currentStoryId");
         if (!existingStoryId) {
             initializeNewStory();
         } else {
+            fetchStory(existingStoryId);
             toast({
                 title: "Existing Story Loaded",
                 description: `Story ID: ${existingStoryId}`,
@@ -216,8 +224,8 @@ const StoryCreator = () => {
                     </VStack>
                 </HStack>
 
-                {story.pages.map((e) => (
-                    <Box>{e.text}</Box>
+                {story.pages.map((e, index) => (
+                    <Box key={index}>{e.text}</Box>
                 ))}
             </VStack>
         </Box>
