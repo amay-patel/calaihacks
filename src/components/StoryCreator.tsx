@@ -76,16 +76,34 @@ const StoryCreatorInner = () => {
             lastVoiceMessage?.message.content !== "" &&
             lastVoiceMessage?.message.content !== null
         ) {
+            // grab most recent message
             const recentMessage = lastVoiceMessage.message.content;
-            if (recentMessage.endsWith("?")) {
-                const newArray = messages;
+            console.log(recentMessage);
+            // end the story
+            if (
+                recentMessage.toLowerCase().endsWith("the end") ||
+                recentMessage.toLowerCase().endsWith("the end.")
+            ) {
+                const newArray = [...messages, recentMessage];
                 const message = newArray.join(" ").trim();
+                console.log(message);
                 setStoryText(message);
                 generateImage(message);
+                setMessages([]);
+                startStopStory(); // maybe change to either stop or start and no toggling
+            } else if (recentMessage.endsWith("?")) {
+                // send to picture generation
+                const newArray = messages;
+                const message = newArray.join(" ").trim();
+                console.log(message);
+                setStoryText(message);
+                generateImage(message);
+                setMessages([]);
+            } else {
+                // append and don't send
+                const newArray = [...messages, recentMessage];
+                setMessages(newArray);
             }
-            // append
-            const newArray = [...messages, recentMessage];
-            setMessages(newArray);
         }
     }, [lastVoiceMessage?.message.content]);
 
