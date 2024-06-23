@@ -39,8 +39,8 @@ const StoryPage = React.forwardRef<
                     </>
                 )}
             </Flex>
-            <Center height="100%" p={8}>
-                <VStack spacing={4}>
+            <Center height="80%" p={32}>
+                <VStack spacing={6}>
                     <Image
                         src={image_url}
                         alt=""
@@ -81,8 +81,8 @@ const PhotoCarousel: React.FC = () => {
     }
 
     return (
-        <Box height="100vh" overflow="hidden">
-            <Box borderWidth={3} backgroundColor="#FEEBC8">
+        <Box height="100vh" overflow="hidden" backgroundColor="#FEEBC8">
+            <Box borderWidth={3}>
                 {/* @ts-ignore */}
                 <HTMLFlipBook
                     width={730}
