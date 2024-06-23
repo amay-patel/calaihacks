@@ -461,7 +461,8 @@ const StoryCreatorInner = () => {
                             flex={0.7}
                             style={{ pointerEvents: "none" }}
                             backgroundColor="#CBC3E3"
-                            p={3}
+                            w={138}
+                            // p={3}
                         >
                             {!isMuted && (
                                 <LiveAudioVisualizer
