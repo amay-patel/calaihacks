@@ -89,7 +89,7 @@ const PhotoCarousel: React.FC = () => {
             <Box borderWidth={3}>
                 {/* @ts-ignore */}
                 <HTMLFlipBook
-                    width={570}
+                    width={730}
                     height={window.innerHeight}
                     size="stretch"
                     // minWidth={315}
