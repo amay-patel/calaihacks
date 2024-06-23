@@ -570,7 +570,8 @@ const StoryCreatorInner = () => {
         </Tooltip>
       </Box>
       <Box position="fixed" top="16px" left="16px" zIndex="sticky">
-        {getFaceByEmotion(topProsody)}
+        <Text marginBottom="1.5rem">Top Emotion</Text>
+        <Box marginLeft="1rem">{getFaceByEmotion(topProsody)}</Box>
       </Box>
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
