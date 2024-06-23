@@ -60,10 +60,10 @@ const PhotoCarousel = () => {
         <Text>{text}</Text>
         {audio_url && <audio controls src={audio_url} />}
         <HStack spacing={8} width="100%" justifyContent="center">
-          <Button onClick={goToPreviousPage} colorScheme="teal">
+          <Button onClick={goToPreviousPage} colorScheme="teal" isDisabled={currentIndex === 0}>
             Previous
           </Button>
-          <Button onClick={goToNextPage} colorScheme="teal">
+          <Button onClick={goToNextPage} colorScheme="teal" isDisabled={currentIndex === pages.length - 1}>
             Next
           </Button>
         </HStack>
