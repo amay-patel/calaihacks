@@ -60,14 +60,15 @@ function App() {
     return (
         <ChakraProvider theme={theme}>
             <Fonts />
-            <FloatingBubblesBackground />
-            <ApiKeyModal />
-            <Router>
-                <Routes>
-                    <Route path="/" element={<StoryCreator />} />
-                    <Route path="/view/:id" element={<PhotoCarousel />} />
-                </Routes>
-            </Router>
+            <FloatingBubblesBackground>
+                <ApiKeyModal />
+                <Router>
+                    <Routes>
+                        <Route path="/" element={<StoryCreator />} />
+                        <Route path="/view/:id" element={<PhotoCarousel />} />
+                    </Routes>
+                </Router>
+            </FloatingBubblesBackground>
         </ChakraProvider>
     );
 }
