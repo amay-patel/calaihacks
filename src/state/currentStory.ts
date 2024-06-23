@@ -1,7 +1,7 @@
 import { atom } from "jotai";
 import { imageFiles } from "../components/ImageNames";
 
-const getRandomImage = () => {
+export const getRandomImage = () => {
     const randomIndex = Math.floor(Math.random() * imageFiles.length);
     return `/defaultImgs/${imageFiles[randomIndex]}`;
 };

@@ -4,8 +4,8 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import StoryCreator from "./components/StoryCreator";
 import { ApiKeyModal } from "./components/ApiKeyModal";
 import { Global } from "@emotion/react";
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import PhotoCarousel from './components/PhotoCarousel';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import PhotoCarousel from "./components/PhotoCarousel";
 import FloatingBubblesBackground from "./components/FloatingBubblesBackground";
 
 // Custom font face definition
@@ -13,8 +13,8 @@ const Fonts = () => (
     <Global
         styles={`
       @font-face {
-        font-family: 'Funkids';
-        src: url('/fonts/Funkids.ttf') format('truetype');
+        font-family: 'hartby';
+        src: url('/fonts/hartby.otf') format('opentype');
         font-weight: normal;
         font-style: normal;
       }
@@ -22,11 +22,11 @@ const Fonts = () => (
     />
 );
 
-// Extend the Chakra theme to use Funkids as the default font
+// Extend the Chakra theme to use Hartby as the default font
 const theme = extendTheme({
     fonts: {
-        body: "Funkids, sans-serif",
-        heading: "Funkids, sans-serif",
+        body: "hartby, sans-serif",
+        heading: "hartby, sans-serif",
     },
     styles: {
         global: {
@@ -60,14 +60,15 @@ function App() {
     return (
         <ChakraProvider theme={theme}>
             <Fonts />
-            <FloatingBubblesBackground />
-            <ApiKeyModal />
-            <Router>
-                <Routes>
-                    <Route path="/" element={<StoryCreator />} />
-                    <Route path="/view/:id" element={<PhotoCarousel />} /> 
-                </Routes>
-            </Router>
+            <FloatingBubblesBackground>
+                <ApiKeyModal />
+                <Router>
+                    <Routes>
+                        <Route path="/" element={<StoryCreator />} />
+                        <Route path="/view/:id" element={<PhotoCarousel />} />
+                    </Routes>
+                </Router>
+            </FloatingBubblesBackground>
         </ChakraProvider>
     );
 }

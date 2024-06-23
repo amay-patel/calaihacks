@@ -1,4 +1,5 @@
 import { atom } from "jotai";
+import { getAllStoryIds } from "../firebase/firebase";
 
 // Define types
 export interface Page {
@@ -12,3 +13,4 @@ export interface Story {
 }
 
 export const storyAtom = atom<Story>({ pages: [] });
+export const allStoriesAtom = atom<string[]>([]);
