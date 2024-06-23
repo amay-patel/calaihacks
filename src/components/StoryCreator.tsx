@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
     Box,
     VStack,
@@ -54,12 +54,13 @@ import { formatDatetime } from "../utils/formatDatetime";
 const StoryCreatorInner = () => {
     const [storyText, setStoryText] = useAtom(storyTextAtom);
     const [storyImage, setStoryImage] = useAtom(storyImageAtom);
+    const audioContextRef = useRef<AudioContext | null>(null);
     const [allStories, setAllStories] = useAtom(allStoriesAtom);
     const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
     const [story, setStory] = useAtom(storyAtom);
     const { hasCopied, onCopy } = useClipboard(
-        `localhost:3000/view/${localStorage.getItem("currentStoryId")}`
+        `localhost:3001/view/${localStorage.getItem("currentStoryId")}`
     );
     const { connect, disconnect, status, lastVoiceMessage } = useVoice();
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>();
@@ -108,36 +109,36 @@ const StoryCreatorInner = () => {
         }
     }, [lastVoiceMessage?.message.content]);
 
-    // useEffect(() => {
-    //     async function setupMediaRecorder() {
-    //       try {
-    //         const stream = await navigator.mediaDevices.getUserMedia({
-    //           audio: true,
-    //         });
-    //         const recorder = new MediaRecorder(stream);
-    //         setMediaRecorder(recorder);
-    //       } catch (err) {
-    //         console.error("Error accessing media devices.", err);
-    //       }
-    //     }
+    useEffect(() => {
+        async function setupMediaRecorder() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true,
+                });
+                const recorder = new MediaRecorder(stream);
+                setMediaRecorder(recorder);
+            } catch (err) {
+                console.error("Error accessing media devices.", err);
+            }
+        }
 
-    //     setupMediaRecorder();
+        setupMediaRecorder();
 
-    //     // Cleanup function
-    //     return () => {
-    //       if (mediaRecorder && mediaRecorder.state !== "inactive") {
-    //         mediaRecorder.stop();
-    //       }
-    //     };
-    //   }, []);
+        // Cleanup function
+        return () => {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+        };
+    }, []);
 
-    //   useEffect(() => {
-    //     audioContextRef.current = new (window.AudioContext ||
-    //       window.webkitAudioContext)();
-    //     if (mediaRecorder && mediaRecorder.state === "inactive") {
-    //       mediaRecorder.start();
-    //     }
-    //   }, [mediaRecorder]);
+    useEffect(() => {
+        audioContextRef.current = new (window.AudioContext ||
+            window.AudioContext)();
+        if (mediaRecorder && mediaRecorder.state === "inactive") {
+            mediaRecorder.start();
+        }
+    }, [mediaRecorder]);
 
     const toast = useToast();
 
@@ -396,12 +397,12 @@ const StoryCreatorInner = () => {
                 </Text>
 
                 {/* {mediaRecorder && (
-        <LiveAudioVisualizer
-          mediaRecorder={mediaRecorder}
-          width={200}
-          height={75}
-        />
-      )} */}
+                    <LiveAudioVisualizer
+                        mediaRecorder={mediaRecorder}
+                        width={200}
+                        height={30}
+                    />
+                )} */}
 
                 <Box h="md">
                     {isGenerating && story.pages.length === 0 ? (
@@ -471,7 +472,7 @@ const StoryCreatorInner = () => {
                     <ModalBody marginBottom={7}>
                         <Flex>
                             <Input
-                                value={`localhost:3000/view/${localStorage.getItem(
+                                value={`localhost:3001/view/${localStorage.getItem(
                                     "currentStoryId"
                                 )}`}
                                 isReadOnly
