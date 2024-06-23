@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
+import { Center, VStack, Image, Text, HStack, Button } from '@chakra-ui/react';
 import db from '../firebase/firebase';
 import { Page } from '../state/story';
 
@@ -27,7 +28,7 @@ const PhotoCarousel = () => {
       fetchStory();
     }
   }, [id]);
-  
+
   const goToNextPage = () => {
     if (currentIndex < pages.length - 1) {
       setCurrentIndex(currentIndex + 1);
@@ -44,13 +45,31 @@ const PhotoCarousel = () => {
     }
   };
 
+  const currentPage = pages[currentIndex];
+
+  if (!currentPage) {
+    return <Center>Loading...</Center>;
+  }
+
+  const { image_url, text, audio_url } = currentPage;
+
   return (
-    <div>
-      <button onClick={goToPreviousPage}>Previous</button>
-      <button onClick={goToNextPage}>Next</button>
-      <img src={pages[currentIndex]?.image_url} alt="Story page" />
-    </div>
+    <Center height="100vh" flexDirection="column">
+      <VStack spacing={4}>
+        <Image src={image_url} alt={text} boxSize="400px" objectFit="cover" />
+        <Text>{text}</Text>
+        {audio_url && <audio controls src={audio_url} />}
+        <HStack spacing={8} width="100%" justifyContent="center">
+          <Button onClick={goToPreviousPage} colorScheme="teal">
+            Previous
+          </Button>
+          <Button onClick={goToNextPage} colorScheme="teal">
+            Next
+          </Button>
+        </HStack>
+      </VStack>
+    </Center>
   );
-}
+};
 
 export default PhotoCarousel;
