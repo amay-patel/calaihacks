@@ -519,7 +519,7 @@ const StoryCreator = () => {
     return (
         <VoiceProvider
             auth={{ type: "accessToken", value: accessToken }}
-            configId="d615bf07-8989-4514-8401-13e47804c6ad"
+            configId={process.env.REACT_APP_CONFIG_ID}
         >
             <StoryCreatorInner />
         </VoiceProvider>
