@@ -422,7 +422,7 @@ const StoryCreatorInner = () => {
                     )}
                 </Box>
 
-                {status.value !== "connected" ? (
+                {status.value === "connected" ? (
                     <Button
                         onClick={startStopStory}
                         color="green"
@@ -432,11 +432,11 @@ const StoryCreatorInner = () => {
                         Start Story
                     </Button>
                 ) : mediaRecorder ? (
-                    <Flex gap={4} maxW={800} margin="auto">
+                    <Flex gap={2} maxW={800} margin="auto">
                         <Button
                             flex={0.7}
-                            disabled
-                            backgroundColor="#ebebfa"
+                            style={{ pointerEvents: "none" }}
+                            backgroundColor="#CBC3E3"
                             p={3}
                         >
                             <LiveAudioVisualizer
