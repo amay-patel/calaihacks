@@ -463,12 +463,14 @@ const StoryCreatorInner = () => {
                             backgroundColor="#CBC3E3"
                             p={3}
                         >
-                            <LiveAudioVisualizer
-                                mediaRecorder={mediaRecorder}
-                                barColor="white"
-                                width={120}
-                                height={25}
-                            />
+                            {!isMuted && (
+                                <LiveAudioVisualizer
+                                    mediaRecorder={mediaRecorder}
+                                    barColor="white"
+                                    width={120}
+                                    height={25}
+                                />
+                            )}
                         </Button>
                         <Button
                             flex={0.3}
