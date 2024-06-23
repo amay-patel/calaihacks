@@ -48,6 +48,7 @@ import {
     fetchOpenAiWithDiffusionPrompt,
 } from "../utils/fetchOpenAi";
 import { formatDatetime } from "../utils/formatDatetime";
+import { IoMdMic, IoMdMicOff } from "react-icons/io";
 
 // Jotai atoms for state management
 
@@ -59,10 +60,19 @@ const StoryCreatorInner = () => {
     const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
     const [story, setStory] = useAtom(storyAtom);
+    const [globalMuted, setGlobalMuted] = useState(false);
     const { hasCopied, onCopy } = useClipboard(
         `localhost:3001/view/${localStorage.getItem("currentStoryId")}`
     );
-    const { connect, disconnect, status, lastVoiceMessage } = useVoice();
+    const {
+        connect,
+        disconnect,
+        status,
+        lastVoiceMessage,
+        mute,
+        unmute,
+        isMuted,
+    } = useVoice();
     const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder>();
     const { isOpen, onOpen, onClose } = useDisclosure();
     const [messages, setMessages] = useState<string[]>([]);
@@ -73,12 +83,19 @@ const StoryCreatorInner = () => {
     }, [status]);
 
     useEffect(() => {
+        console.log(isMuted);
+    }, [isMuted]);
+
+    useEffect(() => {
         // updates the messages from the bot
         if (
             lastVoiceMessage != null &&
             lastVoiceMessage?.message.content !== "" &&
             lastVoiceMessage?.message.content !== null
         ) {
+            // there is a valid message -->
+            // mute the user
+            mute();
             // grab most recent message
             const recentMessage = lastVoiceMessage.message.content;
             console.log(recentMessage);
@@ -94,6 +111,9 @@ const StoryCreatorInner = () => {
                 generateImage(message);
                 setMessages([]);
                 startStopStory(); // maybe change to either stop or start and no toggling
+                if (!globalMuted) {
+                    unmute();
+                }
             } else if (recentMessage.endsWith("?")) {
                 // send to picture generation
                 const newArray = messages;
@@ -102,6 +122,9 @@ const StoryCreatorInner = () => {
                 setStoryText(message);
                 generateImage(message);
                 setMessages([]);
+                if (!globalMuted) {
+                    unmute();
+                }
             } else {
                 // append and don't send
                 const newArray = [...messages, recentMessage];
@@ -240,6 +263,7 @@ const StoryCreatorInner = () => {
     };
 
     const startStopStory = async () => {
+        console.log("firing");
         setIsGenerating(true);
         if (status.value === "connected") {
             disconnect();
@@ -471,6 +495,31 @@ const StoryCreatorInner = () => {
                 )}
             </VStack>
             <Box position="fixed" top={4} right={4} zIndex={10}>
+                <Tooltip
+                    label={globalMuted ? "unmute" : "mute"}
+                    aria-label="mute or unmute"
+                >
+                    {globalMuted ? (
+                        <IconButton
+                            icon={<IoMdMicOff />}
+                            aria-label="muted"
+                            onClick={() => {
+                                unmute();
+                                setGlobalMuted(false);
+                            }}
+                        ></IconButton>
+                    ) : (
+                        <IconButton
+                            icon={<IoMdMic />}
+                            aria-label="unmuted"
+                            onClick={() => {
+                                mute();
+                                setGlobalMuted(true);
+                            }}
+                        ></IconButton>
+                    )}
+                </Tooltip>
+
                 <Menu>
                     <Tooltip label="Browse Stories" aria-label="Edit tooltip">
                         <MenuButton
@@ -478,6 +527,7 @@ const StoryCreatorInner = () => {
                             icon={<FaBookOpen />}
                             aria-label="Browse"
                             mr={2}
+                            ml={2}
                         />
                     </Tooltip>
                     <MenuList maxHeight="600px" overflowY="auto">
@@ -533,6 +583,7 @@ const StoryCreator = () => {
         const apiKey = apiKeys.HUME_API_KEY;
         const secretKey = apiKeys.HUME_SECRET_KEY;
         const token = await fetchAccessToken({ apiKey, secretKey });
+        console.log("heres the token", token);
         setAccessToken(token);
     };
 
