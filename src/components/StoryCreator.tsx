@@ -84,14 +84,16 @@ const StoryCreatorInner = () => {
   const prosody = lastVoiceMessage?.models.prosody?.scores ?? {};
   useEffect(() => {
     const myObj = prosody;
-    const newTopProsody = Object.keys(myObj).reduce((a, b) =>
-      typeof myObj[a] === "number" &&
-      typeof myObj[b] === "number" &&
-      myObj[a] > myObj[b]
-        ? a
-        : b
-    );
-    setTopProsody(newTopProsody);
+    if (Object.keys(myObj).length > 0) {
+      const newTopProsody = Object.keys(myObj).reduce((a, b) =>
+        typeof myObj[a] === "number" &&
+        typeof myObj[b] === "number" &&
+        myObj[a] > myObj[b]
+          ? a
+          : b
+      );
+      setTopProsody(newTopProsody);
+    }
   }, [lastVoiceMessage]);
 
   useEffect(() => {
@@ -327,16 +329,13 @@ const StoryCreatorInner = () => {
       const completionsResponseData = await completionsResponse.json();
       const promptRaw: string =
         completionsResponseData.choices[0].message.content;
-      const extraAttribute = topProsody ? `, ${topProsody}` : "";
+      const extraAttribute = topProsody ? `, ${topProsody.toLowerCase()}` : "";
       let promptSplit = promptRaw.split(".");
-      promptSplit[0] = `${promptSplit[0]}, hand-drawn illustration${extraAttribute}`;
+      promptSplit[0] = `${promptSplit[0]}, cute, hand-drawn illustration${extraAttribute}`;
       const promptCommas = promptSplit.join(", ").split("\n").join("");
       const prompt = promptCommas[0].toLowerCase() + promptCommas.slice(1);
 
-      const response = await fetchDallE(
-        apiKeys.OPENAI_API_KEY,
-        `cute, ${prompt}`
-      );
+      const response = await fetchDallE(apiKeys.OPENAI_API_KEY, `${prompt}`);
 
       if (!response.ok) {
         throw new Error("Failed to generate image");
