@@ -233,6 +233,7 @@ const StoryCreatorInner = () => {
             disconnect();
             // pop modal
             onOpen();
+            setIsGenerating(false);
             return;
         }
         void connect()
