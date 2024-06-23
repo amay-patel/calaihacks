@@ -20,7 +20,7 @@ const StoryPage = React.forwardRef<HTMLDivElement, Page & {pageNumber: number}>(
         </> : <><Spacer />
         <div>{pageNumber}</div></>}
       </Flex>
-      <Center height="100%" p={8} backgroundColor="#FEEBC8">
+      <Center height="100%" p={8}>
         <VStack spacing={4}>
           <Image src={image_url} alt="" boxSize="400px" objectFit="cover" />
           <Text>{text}</Text>
