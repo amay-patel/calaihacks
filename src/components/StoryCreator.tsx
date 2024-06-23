@@ -406,7 +406,7 @@ const StoryCreatorInner = () => {
                         <Image
                             src={storyImage}
                             alt="Story illustration"
-                            objectFit="cover"
+                            objectFit="contain"
                             boxSize="300px"
                             width="100%"
                             height="100%"
