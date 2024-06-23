@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { Center, VStack, Image, Text, HStack, Button, Flex } from '@chakra-ui/react';
+import { Center, VStack, Image, Text, HStack, Button, Flex, Spacer } from '@chakra-ui/react';
 import db from '../firebase/firebase';
 import { Page } from '../state/story';
 import HTMLFlipBook from 'react-pageflip';
@@ -77,9 +77,15 @@ import { Box } from '@chakra-ui/react';
 //   );
 // };
 
-const StoryPage = React.forwardRef<HTMLDivElement, Page>(({ image_url, text, audio_url }, ref) => {
+const StoryPage = React.forwardRef<HTMLDivElement, Page & {pageNumber: number}>(({ image_url, text, audio_url, pageNumber }, ref) => { 
   return (
     <div ref={ref}>
+      <Flex p={4}>
+        {pageNumber % 2 === 0 ? <>
+          <div>{pageNumber}</div><Spacer />
+        </> : <><Spacer />
+        <div>{pageNumber}</div></>}
+      </Flex>
       <Center height="100%" p={8} backgroundColor="#FEEBC8">
         <VStack spacing={4}>
           <Image src={image_url} alt="" boxSize="400px" objectFit="cover" />
@@ -130,7 +136,7 @@ const PhotoCarousel: React.FC = () => {
             showCover={true}
             mobileScrollSupport={true}>
         {pages.pages.map((page, index) => (
-              <StoryPage key={index} {...page} />
+              <StoryPage key={index} pageNumber={index + 1} {...page} />
         ))}
       </HTMLFlipBook> 
     </Box>
