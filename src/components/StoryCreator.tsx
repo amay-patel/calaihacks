@@ -43,6 +43,10 @@ import { FaBookOpen, FaPlus } from "react-icons/fa";
 import { VoiceProvider, useVoice } from "@humeai/voice-react";
 import ImageWithShimmer from "./ImageWithShimmer";
 import { LiveAudioVisualizer } from "react-audio-visualize";
+import {
+    fetchDallE,
+    fetchOpenAiWithDiffusionPrompt,
+} from "../utils/fetchOpenAi";
 
 // Jotai atoms for state management
 
@@ -72,11 +76,16 @@ const StoryCreatorInner = () => {
             lastVoiceMessage?.message.content !== "" &&
             lastVoiceMessage?.message.content !== null
         ) {
-            // const newArray = [...messages, lastVoiceMessage.message.content]
-            setMessages([lastVoiceMessage.message.content]);
-            // const message = newArray.join(' ').trim()
-            setStoryText(lastVoiceMessage.message.content);
-            generateImage(lastVoiceMessage.message.content);
+            const recentMessage = lastVoiceMessage.message.content;
+            if (recentMessage.endsWith("?")) {
+                const newArray = messages;
+                const message = newArray.join(" ").trim();
+                setStoryText(message);
+                generateImage(message);
+            }
+            // append
+            const newArray = [...messages, recentMessage];
+            setMessages(newArray);
         }
     }, [lastVoiceMessage?.message.content]);
 
@@ -231,20 +240,22 @@ const StoryCreatorInner = () => {
 
         setIsGenerating(true);
         try {
-            const response = await fetch(
-                "https://api.openai.com/v1/images/generations",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${apiKeys.OPENAI_API_KEY}`,
-                    },
-                    body: JSON.stringify({
-                        prompt: message,
-                        n: 1,
-                        size: "512x512",
-                    }),
-                }
+            const completionsResponse = await fetchOpenAiWithDiffusionPrompt(
+                apiKeys.OPENAI_API_KEY,
+                message
+            );
+            const completionsResponseData = await completionsResponse.json();
+            const promptRaw: string =
+                completionsResponseData.choices[0].message.content;
+            let promptSplit = promptRaw.split(".");
+            promptSplit[0] = `${promptSplit[0]}, cute, hand-drawn illustration`;
+            const promptCommas = promptSplit.join(", ").split("\n").join("");
+            const prompt =
+                promptCommas[0].toLowerCase() + promptCommas.slice(1);
+
+            const response = await fetchDallE(
+                apiKeys.OPENAI_API_KEY,
+                `cute, ${prompt}`
             );
 
             if (!response.ok) {

@@ -3,6 +3,7 @@ import { initializeApp, cert } from "firebase-admin/app";
 import { getStorage } from "firebase-admin/storage";
 import https from "https";
 import { v4 as uuidv4 } from "uuid";
+import cors from "cors";
 
 // Initialize Firebase
 const serviceAccount = require("../serviceAccountKey.json");
@@ -14,6 +15,7 @@ initializeApp({
 const app = express();
 const port = 3000;
 
+app.use(cors());
 app.use(express.json());
 
 function fetchImage(url: string): Promise<Buffer> {
