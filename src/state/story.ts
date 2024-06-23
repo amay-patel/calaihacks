@@ -9,8 +9,9 @@ export interface Page {
 }
 
 export interface Story {
+    datetime: string;
     pages: Page[];
 }
 
-export const storyAtom = atom<Story>({ pages: [] });
+export const storyAtom = atom<Story>({ pages: [], datetime: new Date().toISOString() });
 export const allStoriesAtom = atom<string[]>([]);

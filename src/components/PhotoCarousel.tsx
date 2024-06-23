@@ -22,6 +22,7 @@ import { storyAtom } from "../state/story";
 import { Box } from "@chakra-ui/react";
 import "./../photocarousel.css";
 import { useVoiceClient } from "@humeai/voice-react";
+import { formatDatetime } from "../utils/formatDatetime";
 
 const StoryPage = React.forwardRef<
   HTMLDivElement,
@@ -88,7 +89,7 @@ const StoryPage = React.forwardRef<
 
 const PhotoCarousel: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [pages, setPages] = useAtom(storyAtom);
+  const [story, setStory] = useAtom(storyAtom);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [accessToken, setAccessToken] = useState("");
   const [apiKeys] = useAtom(apiKeysAtom);
@@ -216,7 +217,7 @@ const PhotoCarousel: React.FC = () => {
       const fetchStory = async (storyId: string) => {
         const storyRef = await getStory(storyId);
         if (storyRef) {
-          setPages(storyRef);
+          setStory(storyRef);
         } else {
           console.log("No such document!");
         }
@@ -224,15 +225,18 @@ const PhotoCarousel: React.FC = () => {
 
       fetchStory(id);
     }
-  }, [id, setPages]);
+  }, [id, setStory]);
 
-  const currentPage = pages.pages[currentIndex];
+  const currentPage = story.pages[currentIndex];
   if (!currentPage) {
     return <Center>Loading...</Center>;
   }
 
   return (
     <Box height="100vh" overflow="hidden" backgroundColor="#FEEBC8">
+      <Text color="gray" textAlign="center">
+        {story.datetime && formatDatetime(story.datetime)}
+      </Text>
       <Box borderWidth={3}>
         {/* @ts-ignore */}
         <HTMLFlipBook
@@ -247,7 +251,7 @@ const PhotoCarousel: React.FC = () => {
           showCover={false}
           mobileScrollSupport={true}
         >
-          {pages.pages.map((page, index) => (
+          {story.pages.map((page, index) => (
             <StoryPage
               key={index}
               pageNumber={index + 1}

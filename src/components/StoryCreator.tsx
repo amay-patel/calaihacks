@@ -47,6 +47,7 @@ import {
     fetchDallE,
     fetchOpenAiWithDiffusionPrompt,
 } from "../utils/fetchOpenAi";
+import { formatDatetime } from "../utils/formatDatetime";
 
 // Jotai atoms for state management
 
@@ -205,7 +206,7 @@ const StoryCreatorInner = () => {
         try {
             const newStoryId = await createStory([]);
             localStorage.setItem("currentStoryId", newStoryId);
-            setStory({ pages: [] });
+            setStory({ pages: [], datetime: new Date().toISOString()});
             setStoryImage(getRandomImage());
             toast({
                 position: "bottom-right",
@@ -389,7 +390,10 @@ const StoryCreatorInner = () => {
         <Box p={5} maxWidth="800px" margin="auto">
             <VStack spacing={6} align="stretch" marginTop="2rem">
                 <Text fontSize="2xl" fontWeight="bold" textAlign="center">
-                    Interactive Storybook Creator
+                    StoryBook AI
+                </Text>
+                <Text color="gray" textAlign="center">
+                    {story.datetime && formatDatetime(story.datetime)}
                 </Text>
 
                 {/* {mediaRecorder && (
