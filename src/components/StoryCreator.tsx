@@ -83,8 +83,10 @@ const StoryCreatorInner = () => {
     const prosody = lastVoiceMessage?.models.prosody?.scores ?? {};
     useEffect(() => {
         const myObj = prosody;
-        const newTopProsody = Object.keys(myObj).reduce((a, b) => (typeof myObj[a] === 'number' && typeof myObj[b] === 'number' && myObj[a] > myObj[b]) ? a : b)
-        setTopProsody(newTopProsody)
+        if (Object.keys(myObj).length > 0) {
+            const newTopProsody = Object.keys(myObj).reduce((a, b) => (typeof myObj[a] === 'number' && typeof myObj[b] === 'number' && myObj[a] > myObj[b]) ? a : b);
+            setTopProsody(newTopProsody);
+        }
     }, [lastVoiceMessage])
 
     useEffect(() => {
