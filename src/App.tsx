@@ -4,6 +4,7 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import StoryCreator from "./components/StoryCreator";
 import { ApiKeyModal } from "./components/ApiKeyModal";
 import { Global } from "@emotion/react";
+import FloatingBubblesBackground from "./components/FloatingBubblesBackground";
 
 // Custom font face definition
 const Fonts = () => (
@@ -57,6 +58,7 @@ function App() {
     return (
         <ChakraProvider theme={theme}>
             <Fonts />
+            <FloatingBubblesBackground />
             <ApiKeyModal />
             <StoryCreator />
         </ChakraProvider>

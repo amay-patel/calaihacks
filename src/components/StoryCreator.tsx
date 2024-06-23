@@ -191,16 +191,20 @@ const StoryCreator = () => {
                 </Text>
 
                 <HStack>
-                    <Box flex={1} borderWidth={1} borderRadius="md" p={4}>
+                    <Box flex={1}>
                         <Image
                             src={storyImage}
                             alt="Story illustration"
                             objectFit="cover"
                             boxSize="300px"
+                            width="100%"
+                            height="100%"
+                            borderRadius="0.5rem"
                         />
                     </Box>
                     <VStack flex={1} align="stretch" spacing={4}>
                         <Textarea
+                            backgroundColor={"white"}
                             value={storyText}
                             onChange={(e) => setStoryText(e.target.value)}
                             placeholder="Your story will appear here..."
