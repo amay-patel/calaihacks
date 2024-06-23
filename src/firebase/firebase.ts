@@ -9,6 +9,8 @@ import {
     addDoc,
     DocumentReference,
     DocumentSnapshot,
+    QuerySnapshot,
+    getDocs,
 } from "firebase/firestore";
 import { Page, Story } from "../state/story";
 
@@ -100,6 +102,24 @@ export const addPageToStory = async (
         }
     } catch (error) {
         console.error("Error adding page to story:", error);
+        throw error;
+    }
+};
+
+export const getAllStoryIds = async (): Promise<string[]> => {
+    try {
+        const storiesRef = collection(db, "stories");
+        const querySnapshot: QuerySnapshot = await getDocs(storiesRef);
+
+        const storyIds: string[] = [];
+
+        querySnapshot.forEach((doc) => {
+            storyIds.push(doc.id);
+        });
+
+        return storyIds;
+    } catch (error) {
+        console.error("Error getting all story IDs:", error);
         throw error;
     }
 };

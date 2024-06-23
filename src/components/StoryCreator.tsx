@@ -15,13 +15,18 @@ import {
 } from "@chakra-ui/react";
 import { useAtom } from "jotai";
 import { apiKeysAtom } from "../state/apiKeys"; // Make sure this path is correct
-import { addPageToStory, createStory, getStory } from "../firebase/firebase";
+import {
+    addPageToStory,
+    createStory,
+    getAllStoryIds,
+    getStory,
+} from "../firebase/firebase";
 import {
     getRandomImage,
     storyImageAtom,
     storyTextAtom,
 } from "../state/currentStory";
-import { storyAtom } from "../state/story";
+import { allStoriesAtom, storyAtom } from "../state/story";
 import { fetchAccessToken } from "@humeai/voice";
 import { FaBookOpen, FaPencilAlt, FaPlus } from "react-icons/fa";
 import { VoiceProvider, useVoice } from "@humeai/voice-react";
@@ -32,6 +37,7 @@ import ImageWithShimmer from "./ImageWithShimmer";
 const StoryCreatorInner = () => {
     const [storyText, setStoryText] = useAtom(storyTextAtom);
     const [storyImage, setStoryImage] = useAtom(storyImageAtom);
+    const [allStories, setAllStories] = useAtom(allStoriesAtom);
     const [apiKeys] = useAtom(apiKeysAtom);
     const [isGenerating, setIsGenerating] = useState(false);
     const [story, setStory] = useAtom(storyAtom);
@@ -70,8 +76,14 @@ const StoryCreatorInner = () => {
             }
         };
 
+        const fetchAllStories = async () => {
+            const stories = await getAllStoryIds();
+            setAllStories(stories);
+        };
+
         // Check if there's an existing story ID in localStorage
         const existingStoryId = localStorage.getItem("currentStoryId");
+        fetchAllStories();
         if (!existingStoryId) {
             initializeNewStory();
         } else {
@@ -237,6 +249,31 @@ const StoryCreatorInner = () => {
         }
     };
 
+    const checkoutExistingStory = async (storyId: string) => {
+        try {
+            const newStory = await getStory(storyId);
+            localStorage.setItem("currentStoryId", storyId);
+            if (newStory) {
+                setStory(newStory);
+                if (newStory.pages.length > 0) {
+                    setStoryImage(newStory.pages.at(-1)?.image_url!);
+                } else {
+                    setStoryImage(getRandomImage());
+                }
+            }
+        } catch (error) {
+            console.error("Error creating new story:", error);
+            toast({
+                position: "bottom-right",
+                title: "Error",
+                description: "Failed to create a new story.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
+
     return (
         <Box p={5} maxWidth="800px" margin="auto">
             <VStack spacing={6} align="stretch" marginTop="2rem">
@@ -287,22 +324,15 @@ const StoryCreatorInner = () => {
                             onClick={() => console.log("Edit clicked")}
                         />
                     </Tooltip>
-                    <MenuList>
-                        <MenuItem
-                            onClick={() => console.log("Option 1 clicked")}
-                        >
-                            Option 1
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => console.log("Option 2 clicked")}
-                        >
-                            Option 2
-                        </MenuItem>
-                        <MenuItem
-                            onClick={() => console.log("Option 3 clicked")}
-                        >
-                            Option 3
-                        </MenuItem>
+                    <MenuList maxHeight="600px" overflowY="auto">
+                        {allStories.map((e, index) => (
+                            <MenuItem
+                                key={index}
+                                onClick={() => checkoutExistingStory(e)}
+                            >
+                                {e}
+                            </MenuItem>
+                        ))}
                     </MenuList>
                 </Menu>
                 <Tooltip label="Create New Story" aria-label="Edit tooltip">
