@@ -368,7 +368,7 @@ const StoryCreator = () => {
     return (
         <VoiceProvider
             auth={{ type: "accessToken", value: accessToken }}
-            configId="75c86545-f045-447c-9355-740536170928"
+            configId="d615bf07-8989-4514-8401-13e47804c6ad"
         >
             <StoryCreatorInner />
         </VoiceProvider>
